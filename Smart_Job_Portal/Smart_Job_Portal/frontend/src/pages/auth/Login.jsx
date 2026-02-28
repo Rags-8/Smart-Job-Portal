@@ -23,80 +23,85 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-5rem)] flex bg-white animate-fade-in relative overflow-hidden">
-            {/* Background Decorations */}
-            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-            <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-
-            <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="max-w-md w-full space-y-8 glass p-10 rounded-3xl animate-slide-up">
-                    <div className="text-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold mx-auto shadow-lg mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
+        <div className="min-h-[calc(100vh-5rem)] flex bg-[#f8f6fc] font-sans">
+            <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row">
+                {/* Left Side - Login Card */}
+                <div className="w-full md:w-1/2 flex items-center justify-center p-6 lg:p-12">
+                    <div className="bg-white rounded-[2rem] p-10 lg:p-14 w-full max-w-md shadow-[0_10px_40px_rgba(0,0,0,0.04)] text-center animate-slide-up">
+                        {/* Purple Icon */}
+                        <div className="w-16 h-16 bg-[#eee8fe] rounded-3xl flex items-center justify-center text-[#6833ff] text-2xl font-bold mx-auto mb-8 shadow-sm">
                             C
                         </div>
-                        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Welcome back</h2>
-                        <p className="mt-2 text-sm text-gray-600 font-medium">Please enter your details to sign in.</p>
-                    </div>
 
-                    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                        {error && (
-                            <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-semibold border border-red-100 flex items-center">
-                                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
-                                {error}
-                            </div>
-                        )}
-                        <div className="space-y-5">
+                        <h2 className="text-3xl font-extrabold text-[#111827] tracking-tight">Welcome back</h2>
+                        <p className="mt-2 text-[15px] text-gray-500 font-medium mb-10">Please enter your details to sign in.</p>
+
+                        <form className="space-y-6 text-left" onSubmit={handleSubmit}>
+                            {error && (
+                                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-semibold text-center animate-fade-in border border-red-100">
+                                    {error}
+                                </div>
+                            )}
+
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Email address</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Email address</label>
                                 <input
                                     type="email"
                                     required
-                                    className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white"
+                                    className="w-full px-4 py-3.5 bg-[#f0f4f8] border-none rounded-xl text-gray-900 font-medium text-[15px] focus:ring-2 focus:ring-[#e2d5ff] focus:bg-white transition-all placeholder-gray-400"
                                     placeholder="Enter your email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
+
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
                                 <input
                                     type="password"
                                     required
-                                    className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white"
-                                    placeholder="Enter your password"
+                                    className="w-full px-4 py-3.5 bg-[#f0f4f8] border-none rounded-xl text-gray-900 font-bold text-2xl tracking-widest focus:ring-2 focus:ring-[#e2d5ff] focus:bg-white transition-all placeholder-gray-400 placeholder:tracking-normal placeholder:font-medium placeholder:text-[15px] leading-none pb-2 pt-4"
+                                    placeholder="••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
-                        </div>
 
-                        <div>
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gray-900 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-xl hover:shadow-blue-500/30 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-0.5"
+                                className={`w-full py-4 px-4 bg-[#6833ff] hover:bg-[#5221d8] text-white text-base font-bold rounded-xl transition-all shadow-md shadow-[#6833ff]/20 flex items-center justify-center mt-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                             >
-                                {isLoading ? 'Signing in...' : 'Sign in'}
+                                {isLoading ? (
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                ) : (
+                                    'Sign in'
+                                )}
                             </button>
-                        </div>
-                    </form>
-                    <div className="text-center mt-6">
-                        <p className="text-sm text-gray-600 font-medium">
+                        </form>
+
+                        <p className="mt-8 text-sm text-gray-500 font-medium">
                             Don't have an account?{' '}
-                            <Link to="/signup" className="font-bold text-blue-600 hover:text-indigo-600 transition-colors">
+                            <Link to="/signup" className="text-[#6833ff] font-bold hover:text-[#5221d8] transition-colors">
                                 Sign up for free
                             </Link>
                         </p>
                     </div>
                 </div>
-            </div>
 
-            <div className="hidden lg:flex lg:flex-1 relative bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] opacity-50"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
-                <div className="relative z-10 flex flex-col justify-end p-16 text-white h-full w-full">
-                    <h3 className="text-5xl font-extrabold mb-6 leading-tight">Your next career move<br />starts here.</h3>
-                    <p className="text-lg text-blue-100/80 font-medium max-w-md leading-relaxed">Join thousands of professionals who have already accelerated their careers with CareerLens.</p>
+                {/* Right Side - Typography */}
+                <div className="hidden md:flex w-full md:w-1/2 items-center justify-center p-6 lg:p-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
+                    <div className="max-w-lg">
+                        <h1 className="text-5xl lg:text-6xl font-extrabold text-[#111827] tracking-tight leading-[1.15]">
+                            Your next career <br /> move <br /> starts here.
+                        </h1>
+                        <p className="mt-8 text-lg text-slate-500 font-medium leading-relaxed max-w-md">
+                            Join thousands of professionals who have already accelerated their careers with CareerLens.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

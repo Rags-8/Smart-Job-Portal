@@ -23,7 +23,7 @@ const MyJobs = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-transparent py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto animate-fade-in">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
                     <div>
@@ -32,7 +32,7 @@ const MyJobs = () => {
                     </div>
                     <Link
                         to="/admin/post-job"
-                        className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 text-white bg-violet-600 hover:bg-violet-700 hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
                     >
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                         Post New Job
@@ -47,18 +47,18 @@ const MyJobs = () => {
 
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
                     </div>
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {jobs.map((job) => (
                             <div key={job.id} className="bg-white rounded-2xl p-6 hover-lift border border-gray-100 flex flex-col h-full relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-violet-50 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
                                 <div className="relative z-10 flex-1">
                                     <h2 className="text-xl font-bold text-gray-900 mb-1 leading-tight pr-6">{job.title}</h2>
-                                    <p className="text-blue-600 font-bold mb-3 text-sm">{job.company_name}</p>
+                                    <p className="text-violet-600 font-bold mb-3 text-sm">{job.company_name}</p>
                                     <div className="flex flex-wrap gap-2 mb-4">
-                                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold leading-5 bg-blue-50 text-blue-700">
+                                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold leading-5 bg-violet-50 text-violet-700">
                                             {job.job_type}
                                         </span>
                                         <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold leading-5 bg-gray-100 text-gray-700">
@@ -116,7 +116,7 @@ const MyJobs = () => {
                                         </div>
                                         <Link
                                             to={`/admin/job/${job.id}/applicants`}
-                                            className="inline-flex items-center px-4 py-2 text-sm font-bold rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                                            className="inline-flex items-center px-4 py-2 text-sm font-bold rounded-lg text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors"
                                         >
                                             View Applicants
                                             <svg className="w-4 h-4 ml-1.5 -mr-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
@@ -127,14 +127,14 @@ const MyJobs = () => {
                         ))}
                         {jobs.length === 0 && (
                             <div className="col-span-full py-16 text-center bg-white rounded-3xl border-2 border-dashed border-gray-200">
-                                <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="h-10 w-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
+                                <div className="w-20 h-20 bg-violet-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="h-10 w-10 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">No jobs posted yet</h3>
                                 <p className="text-gray-500 font-medium max-w-sm mx-auto mb-6">Get started by creating your first job listing to attract candidates.</p>
                                 <Link
                                     to="/admin/post-job"
-                                    className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 transition-all"
+                                    className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 text-white bg-violet-600 hover:bg-violet-700 hover:-translate-y-0.5 transition-all"
                                 >
                                     Post a Job Now
                                 </Link>

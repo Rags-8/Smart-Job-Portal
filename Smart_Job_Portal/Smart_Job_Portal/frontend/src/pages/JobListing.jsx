@@ -53,7 +53,7 @@ export function JobListing() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
                     {/* Placeholder for company logo if missing */}
-                    <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-xl">
+                    <div className="w-12 h-12 rounded-lg bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-xl">
                       {job.companies?.name?.charAt(0) || 'C'}
                     </div>
                     <div>

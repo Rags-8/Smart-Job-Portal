@@ -38,7 +38,7 @@ export function UserDashboard() {
       <div className="grid gap-6 md:grid-cols-3 mb-8">
         <div className="card p-6 border-l-4 border-l-teal-500">
           <div className="flex items-center gap-4">
-            <div className="bg-teal-100 p-3 rounded-xl"><FileText className="text-teal-600 w-6 h-6" /></div>
+            <div className="bg-violet-100 p-3 rounded-xl"><FileText className="text-violet-600 w-6 h-6" /></div>
             <div>
               <p className="text-sm font-medium text-slate-600">Applications Sent</p>
               <p className="text-2xl font-bold text-slate-900">{applications.length}</p>
@@ -48,7 +48,7 @@ export function UserDashboard() {
 
         <div className="card p-6 border-l-4 border-l-blue-500">
           <div className="flex items-center gap-4">
-            <div className="bg-blue-100 p-3 rounded-xl"><Sparkles className="text-blue-600 w-6 h-6" /></div>
+            <div className="bg-violet-100 p-3 rounded-xl"><Sparkles className="text-violet-600 w-6 h-6" /></div>
             <div>
               <p className="text-sm font-medium text-slate-600">Overall AI Job Match</p>
               <p className="text-2xl font-bold text-slate-900">
@@ -97,7 +97,7 @@ export function UserDashboard() {
                 <div className="flex items-center gap-2">
                   {app.job_match_results?.[0] ? (
                     <>
-                      <div className="text-2xl font-bold text-teal-600">
+                      <div className="text-2xl font-bold text-violet-600">
                         {app.job_match_results[0].match_percentage}%
                       </div>
                       <span className="text-xs px-2 py-1 bg-slate-100 rounded-full text-slate-600">

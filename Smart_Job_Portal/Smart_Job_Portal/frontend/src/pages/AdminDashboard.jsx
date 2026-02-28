@@ -90,7 +90,7 @@ export function AdminDashboard() {
           <h2 className="text-xl font-bold text-slate-900">Your Postings</h2>
           <button
             onClick={() => setShowPostJob(!showPostJob)}
-            className="flex items-center text-sm font-medium text-teal-600 hover:text-teal-700 bg-teal-50 px-3 py-1.5 rounded-lg"
+            className="flex items-center text-sm font-medium text-violet-600 hover:text-violet-700 bg-violet-50 px-3 py-1.5 rounded-lg"
           >
             <PlusCircle className="w-4 h-4 mr-1" />
             New Job
@@ -179,14 +179,14 @@ export function AdminDashboard() {
                       {app.profiles.avatar_url ? (
                         <img src={app.profiles.avatar_url} alt="avatar" className="w-12 h-12 rounded-full" />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-violet-100 text-violet-700 font-bold flex items-center justify-center shrink-0">
                           {app.profiles.full_name?.charAt(0) || 'U'}
                         </div>
                       )}
                       <div>
                         <h3 className="font-bold text-lg text-slate-900">{app.profiles.full_name}</h3>
                         <div className="flex items-center gap-3 mt-1 text-sm">
-                          <a href={app.resume_url} target="_blank" rel="noopener noreferrer" className="flex items-center text-teal-600 hover:text-teal-700">
+                          <a href={app.resume_url} target="_blank" rel="noopener noreferrer" className="flex items-center text-violet-600 hover:text-violet-700">
                             <ExternalLink className="w-4 h-4 mr-1" /> View Resume
                           </a>
                           <span className="text-slate-300">|</span>
@@ -198,7 +198,7 @@ export function AdminDashboard() {
                     {app.job_match_results?.[0] && (
                       <div className="mt-4 bg-slate-50 rounded-lg p-4 border border-slate-100">
                         <div className="flex items-center gap-2 mb-2">
-                          <Sparkles className="w-4 h-4 text-teal-600" />
+                          <Sparkles className="w-4 h-4 text-violet-600" />
                           <span className="font-medium text-slate-700 text-sm">AI Analysis</span>
                         </div>
                         <p className="text-sm text-slate-600">
@@ -215,7 +215,7 @@ export function AdminDashboard() {
 
                   <div className="flex flex-col items-end gap-3 shrink-0 lg:w-48 lg:border-l lg:border-slate-100 lg:pl-6">
                     <div className="text-center w-full">
-                      <div className="text-3xl font-extrabold text-teal-600">
+                      <div className="text-3xl font-extrabold text-violet-600">
                         {app.job_match_results?.[0]?.match_percentage || 0}%
                       </div>
                       <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold mt-1">
@@ -223,7 +223,7 @@ export function AdminDashboard() {
                       </div>
                       <div className="text-sm font-medium mt-1">
                         <span className={`${app.job_match_results?.[0]?.fit_level?.includes('Excellent') ? 'text-green-600' :
-                            app.job_match_results?.[0]?.fit_level?.includes('Good') ? 'text-teal-600' : 'text-amber-600'
+                            app.job_match_results?.[0]?.fit_level?.includes('Good') ? 'text-violet-600' : 'text-amber-600'
                           }`}>
                           {app.job_match_results?.[0]?.fit_level || 'Pending'}
                         </span>

@@ -23,7 +23,7 @@ const MyApplications = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-transparent py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto animate-fade-in">
                 <div className="mb-10 text-center sm:text-left">
                     <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Applications</h1>
@@ -38,23 +38,23 @@ const MyApplications = () => {
 
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
                     </div>
                 ) : (
                     <div className="space-y-6">
                         {applications.map((app) => (
                             <div key={app.id} className="bg-white rounded-2xl p-6 hover-lift border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden group">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-indigo-600"></div>
+                                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-violet-500 to-violet-600"></div>
                                 <div className="flex-1 pl-4 sm:pl-2">
                                     <h2 className="text-xl font-bold text-gray-900 mb-0 tracking-tight">{app.title}</h2>
-                                    <p className="text-sm font-bold text-blue-600 mb-2">{app.company_name}</p>
+                                    <p className="text-sm font-bold text-violet-600 mb-2">{app.company_name}</p>
                                     <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-500 mt-1">
                                         <span className="flex items-center">
                                             <svg className="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
                                             {app.location}
                                         </span>
                                         <span className="flex items-center">
-                                            <svg className="w-4 h-4 mr-1.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                            <svg className="w-4 h-4 mr-1.5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                                             {app.job_type || 'Full-time'}
                                         </span>
                                     </div>
@@ -69,12 +69,12 @@ const MyApplications = () => {
                                         </div>
                                     </div>
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-sm border ${app.status === 'Selected' ? 'bg-green-100 text-green-800 border-green-200' :
-                                        app.status === 'Shortlisted' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                                        app.status === 'Shortlisted' ? 'bg-violet-100 text-violet-800 border-violet-200' :
                                             app.status === 'Rejected' ? 'bg-red-100 text-red-800 border-red-200' :
                                                 'bg-gray-100 text-gray-800 border-gray-200'
                                         }`}>
                                         <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${app.status === 'Selected' ? 'bg-green-500' :
-                                            app.status === 'Shortlisted' ? 'bg-blue-500' :
+                                            app.status === 'Shortlisted' ? 'bg-violet-500' :
                                                 app.status === 'Rejected' ? 'bg-red-500' :
                                                     'bg-gray-500'
                                             }`}></span>

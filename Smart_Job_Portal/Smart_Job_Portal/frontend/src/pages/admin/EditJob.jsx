@@ -89,15 +89,15 @@ const EditJob = () => {
     if (isFetching) {
         return (
             <div className="min-h-screen flex justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-[calc(100vh-5rem)] bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center animate-fade-in relative overflow-hidden">
+        <div className="min-h-[calc(100vh-5rem)] bg-transparent py-12 px-4 sm:px-6 lg:px-8 flex justify-center animate-fade-in relative overflow-hidden">
             {/* Background elements */}
-            <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -mr-48 -mt-48 z-0"></div>
+            <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-violet-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -mr-48 -mt-48 z-0"></div>
 
             <div className="max-w-2xl w-full relative z-10">
                 <div className="mb-8 pl-2">
@@ -106,7 +106,7 @@ const EditJob = () => {
                 </div>
 
                 <div className="glass rounded-3xl p-8 sm:p-10 shadow-xl border border-gray-100 overflow-hidden relative">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-violet-500 via-indigo-500 to-purple-500"></div>
 
                     {error && (
                         <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-semibold border border-red-100 flex items-center mb-6">
@@ -127,7 +127,7 @@ const EditJob = () => {
                                     <input
                                         type="text"
                                         required
-                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                         placeholder="Name of your company"
                                         value={formData.company_name}
                                         onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
@@ -138,7 +138,7 @@ const EditJob = () => {
                                         <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Company Website</label>
                                         <input
                                             type="url"
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                             placeholder="https://example.com"
                                             value={formData.company_website}
                                             onChange={(e) => setFormData({ ...formData, company_website: e.target.value })}
@@ -148,7 +148,7 @@ const EditJob = () => {
                                         <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Company Description</label>
                                         <input
                                             type="text"
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                             placeholder="Brief overview of your company"
                                             value={formData.company_description}
                                             onChange={(e) => setFormData({ ...formData, company_description: e.target.value })}
@@ -169,7 +169,7 @@ const EditJob = () => {
                                     <input
                                         type="text"
                                         required
-                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                         placeholder="e.g. Senior Software Engineer"
                                         value={formData.title}
                                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -182,7 +182,7 @@ const EditJob = () => {
                                         <input
                                             type="text"
                                             required
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                             placeholder="e.g. New York, NY or Remote"
                                             value={formData.location}
                                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -192,7 +192,7 @@ const EditJob = () => {
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Employment Type *</label>
                                         <select
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium cursor-pointer"
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium cursor-pointer"
                                             value={formData.job_type}
                                             onChange={(e) => setFormData({ ...formData, job_type: e.target.value })}
                                         >
@@ -211,7 +211,7 @@ const EditJob = () => {
                                         <input
                                             type="text"
                                             required
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                             placeholder="e.g. 0-2 years, 5+ years"
                                             value={formData.experience_required}
                                             onChange={(e) => setFormData({ ...formData, experience_required: e.target.value })}
@@ -223,7 +223,7 @@ const EditJob = () => {
                                         <input
                                             type="text"
                                             required
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                             placeholder="e.g. React, Node.js, Python (comma separated)"
                                             value={formData.skills_required}
                                             onChange={(e) => setFormData({ ...formData, skills_required: e.target.value })}
@@ -237,7 +237,7 @@ const EditJob = () => {
                                         <input
                                             type="number"
                                             required
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                             placeholder="e.g. 120000"
                                             value={formData.salary}
                                             onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
@@ -250,7 +250,7 @@ const EditJob = () => {
                                             type="number"
                                             required
                                             min="1"
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                             placeholder="e.g. 3"
                                             value={formData.number_of_openings}
                                             onChange={(e) => setFormData({ ...formData, number_of_openings: e.target.value })}
@@ -271,7 +271,7 @@ const EditJob = () => {
                                     <input
                                         type="date"
                                         required
-                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
                                         value={formData.application_last_date}
                                         onChange={(e) => setFormData({ ...formData, application_last_date: e.target.value })}
                                     />
@@ -297,7 +297,7 @@ const EditJob = () => {
                                     <textarea
                                         required
                                         rows={4}
-                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900 resize-y"
+                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900 resize-y"
                                         placeholder="Detailed explanation of the role..."
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -308,7 +308,7 @@ const EditJob = () => {
                                     <textarea
                                         required
                                         rows={3}
-                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900 resize-y"
+                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900 resize-y"
                                         placeholder="List key responsibilities..."
                                         value={formData.responsibilities}
                                         onChange={(e) => setFormData({ ...formData, responsibilities: e.target.value })}
@@ -319,7 +319,7 @@ const EditJob = () => {
                                     <textarea
                                         required
                                         rows={3}
-                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900 resize-y"
+                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900 resize-y"
                                         placeholder="List qualifications and requirements..."
                                         value={formData.requirements}
                                         onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
@@ -329,7 +329,7 @@ const EditJob = () => {
                                     <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Benefits</label>
                                     <textarea
                                         rows={3}
-                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900 resize-y"
+                                        className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900 resize-y"
                                         placeholder="List perks, health insurance, bonuses..."
                                         value={formData.benefits}
                                         onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
@@ -342,7 +342,7 @@ const EditJob = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full flex justify-center py-4 px-4 border border-transparent text-sm font-extrabold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-xl hover:shadow-blue-500/30 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-0.5"
+                                className="w-full flex justify-center py-4 px-4 border border-transparent text-sm font-extrabold rounded-xl text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 shadow-xl hover:shadow-blue-500/30 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-0.5"
                             >
                                 {isLoading ? 'Updating...' : 'Update Job Listing'}
                             </button>

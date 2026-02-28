@@ -14,7 +14,7 @@ const Navbar = () => {
 
     const isActive = (path) => location.pathname === path;
     const linkClass = (path) =>
-        `relative inline-flex items-center px-1 pt-1 text-sm font-semibold transition-colors duration-200 ${isActive(path) ? 'text-blue-600' : 'text-gray-600 hover:text-blue-500'
+        `relative inline-flex items-center px-1 pt-1 text-sm font-semibold transition-colors duration-200 ${isActive(path) ? 'text-violet-600' : 'text-gray-600 hover:text-violet-500'
         } group`;
 
     return (
@@ -23,7 +23,7 @@ const Navbar = () => {
                 <div className="flex justify-between h-20">
                     <div className="flex items-center space-x-12">
                         <Link to={user?.role === 'admin' ? '/admin/dashboard' : '/jobs'} className="flex items-center space-x-2">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">C</div>
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-violet-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">C</div>
                             <span className="text-2xl font-bold text-gradient tracking-tight">CareerLens</span>
                         </Link>
 
@@ -33,22 +33,38 @@ const Navbar = () => {
                                     <>
                                         <Link to="/admin/dashboard" className={linkClass('/admin/dashboard')}>
                                             Dashboard
-                                            {isActive('/admin/dashboard') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-lg"></span>}
+                                            {isActive('/admin/dashboard') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
                                         </Link>
                                         <Link to="/admin/my-jobs" className={linkClass('/admin/my-jobs')}>
-                                            My Jobs
-                                            {isActive('/admin/my-jobs') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-lg"></span>}
+                                            Jobs Posted
+                                            {isActive('/admin/my-jobs') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
+                                        </Link>
+                                        <Link to="/admin/candidates" className={linkClass('/admin/candidates')}>
+                                            Candidates
+                                            {isActive('/admin/candidates') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
+                                        </Link>
+                                        <Link to="/admin/screening" className={linkClass('/admin/screening')}>
+                                            Screening Results
+                                            {isActive('/admin/screening') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
                                         </Link>
                                     </>
                                 ) : (
                                     <>
                                         <Link to="/jobs" className={linkClass('/jobs')}>
                                             Find Jobs
-                                            {isActive('/jobs') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-lg"></span>}
+                                            {isActive('/jobs') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
                                         </Link>
                                         <Link to="/my-applications" className={linkClass('/my-applications')}>
                                             Applications
-                                            {isActive('/my-applications') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-lg"></span>}
+                                            {isActive('/my-applications') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
+                                        </Link>
+                                        <Link to="/resume-builder" className={linkClass('/resume-builder')}>
+                                            Resume Builder
+                                            {isActive('/resume-builder') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
+                                        </Link>
+                                        <Link to="/my-profile" className={linkClass('/my-profile')}>
+                                            My Profile
+                                            {isActive('/my-profile') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
                                         </Link>
                                     </>
                                 )}
@@ -60,7 +76,7 @@ const Navbar = () => {
                             <div className="flex items-center space-x-6">
                                 <div className="flex flex-col text-right">
                                     <span className="text-sm font-semibold text-gray-900">{user.name}</span>
-                                    <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">{user.role}</span>
+                                    <span className="text-xs text-violet-600 font-medium uppercase tracking-wider">{user.role}</span>
                                 </div>
                                 <div className="h-8 w-px bg-gray-200"></div>
                                 <button
@@ -72,10 +88,10 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <div className="flex space-x-4">
-                                <Link to="/login" className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold rounded-full text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                                <Link to="/login" className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold rounded-full text-gray-700 hover:text-violet-600 transition-colors duration-200">
                                     Log in
                                 </Link>
-                                <Link to="/signup" className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold rounded-full text-white bg-gray-900 hover:bg-blue-600 shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-0.5">
+                                <Link to="/signup" className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold rounded-full text-white bg-gray-900 hover:bg-violet-600 shadow-lg hover:shadow-violet-500/30 transition-all duration-300 hover:-translate-y-0.5">
                                     Sign up
                                 </Link>
                             </div>

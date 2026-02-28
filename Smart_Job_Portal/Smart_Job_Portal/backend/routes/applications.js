@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { verifyAuth, verifyAdmin } = require('./auth');
 const db = require('../db');
+const { sendEmail } = require('../utils/emailService');
 
 // POST /api/applications/:jobId -> User only
 router.post('/:jobId', verifyAuth, async (req, res) => {
@@ -12,9 +13,10 @@ router.post('/:jobId', verifyAuth, async (req, res) => {
 
     const jobId = req.params.jobId;
 
-    // Check if job exists
-    const { rows: jobs } = await db.query('SELECT id FROM jobs WHERE id = $1', [jobId]);
+    // Check if job exists and get details for the email
+    const { rows: jobs } = await db.query('SELECT id, title, company_name FROM jobs WHERE id = $1', [jobId]);
     if (jobs.length === 0) return res.status(404).json({ error: 'Job not found' });
+    const job = jobs[0];
 
     // Check if already applied
     const { rows: existing } = await db.query('SELECT id FROM applications WHERE user_id = $1 AND job_id = $2', [req.user.id, jobId]);
@@ -31,6 +33,20 @@ router.post('/:jobId', verifyAuth, async (req, res) => {
             VALUES ($1, $2, 'applied', $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
         `, [req.user.id, jobId, full_name, email, phone_number, skills, experience, resume_url, github_url || '', linkedin_url || '']);
+
+    // Send the immediate confirmation email (asynchronously, don't block response)
+    const emailSubject = `Application Received: ${job.title} at ${job.company_name}`;
+    const emailHtml = `
+      <h2>Application Confirmed</h2>
+      <p>Dear ${full_name},</p>
+      <p>This email is to confirm that we have successfully received your application for the <strong>${job.title}</strong> position at <strong>${job.company_name}</strong>.</p>
+      <p>Our team (and our automated AI screening system) will review your profile shortly. You will receive an update regarding your application status within 24 hours.</p>
+      <br/>
+      <p>Thank you,</p>
+      <p>The ${job.company_name} Hiring Team</p>
+    `;
+
+    sendEmail(email, emailSubject, emailHtml).catch(err => console.error("Failed to send confirm email:", err));
 
     res.status(201).json(rows[0]);
   } catch (error) {

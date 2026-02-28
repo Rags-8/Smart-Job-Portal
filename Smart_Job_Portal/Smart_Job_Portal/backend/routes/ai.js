@@ -8,7 +8,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Helper function to call Gemini
 async function analyzeWithGemini(prompt) {
-    if (!process.env.GEMINI_API_KEY) return "AI Integration Unavailable. Please add GEMINI_API_KEY.";
+    if (!process.env.GEMINI_API_KEY) return "ERROR: AI Integration Unavailable. Please add GEMINI_API_KEY.";
 
     try {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -16,8 +16,10 @@ async function analyzeWithGemini(prompt) {
         const response = await result.response;
         return response.text();
     } catch (error) {
-        console.error("Gemini Error:", error);
-        return "Error analyzing with AI.";
+        console.error("=============== GEMINI STRICT ERROR LOG ===============");
+        console.error(error);
+        console.error("=====================================================");
+        return "ERROR: " + error.message;
     }
 }
 
@@ -50,6 +52,9 @@ router.post('/analyze-resume', verifyAuth, async (req, res) => {
         `;
 
         const aiResponse = await analyzeWithGemini(prompt);
+        if (aiResponse.startsWith("ERROR: ")) {
+            return res.status(400).json({ error: aiResponse.replace("ERROR: ", "") });
+        }
         let parsedData = {};
         try {
             parsedData = JSON.parse(aiResponse.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, ''));
@@ -118,6 +123,9 @@ router.post('/match-job', verifyAuth, async (req, res) => {
         `;
 
         const aiResponse = await analyzeWithGemini(prompt);
+        if (aiResponse.startsWith("ERROR: ")) {
+            return res.status(400).json({ error: aiResponse.replace("ERROR: ", "") });
+        }
         let parsedData = {};
         try {
             parsedData = JSON.parse(aiResponse.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, ''));
@@ -168,6 +176,9 @@ router.post('/recommendations', verifyAuth, async (req, res) => {
         `;
 
         const aiResponse = await analyzeWithGemini(prompt);
+        if (aiResponse.startsWith("ERROR: ")) {
+            return res.status(400).json({ error: aiResponse.replace("ERROR: ", "") });
+        }
         let parsedData = {};
         try {
             parsedData = JSON.parse(aiResponse.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, ''));
@@ -202,6 +213,56 @@ router.post('/recommendations', verifyAuth, async (req, res) => {
         res.json({ recommendations: recRows[0] });
 
     } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 4. Generate Resume from Prompt
+router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
+    try {
+        const { prompt: userPrompt } = req.body;
+
+        if (!userPrompt || userPrompt.trim() === '') {
+            return res.status(400).json({ error: 'Prompt is required' });
+        }
+
+        const prompt = `
+        You are an expert resume writer. The user wants to generate a resume based on this prompt:
+        "${userPrompt}"
+        
+        Generate a comprehensive, professional, and ATS-friendly resume. Return ONLY a JSON object with strictly these exact keys and structure:
+        {
+            "personal": { "fullName": "", "jobTitle": "", "email": "", "phone": "", "linkedin": "", "github": "", "portfolio": "", "summary": "" },
+            "skills": { "frontend": [], "backend": [], "database": [], "tools": [] },
+            "projects": [ { "title": "", "description": "" } ],
+            "experience": [ { "company": "", "role": "", "duration": "", "description": "" } ],
+            "education": [ { "degree": "", "college": "", "year": "" } ],
+            "certifications": [ { "name": "", "issuer": "" } ],
+            "achievements": [ { "description": "" } ]
+        }
+        
+        Fill in as much detail as you can reasonably infer or generate to make a strong resume based on the prompt. For fields like email, phone, links, use placeholders if not provided. Make the summary compelling. Ensure arrays are correctly formatted.
+        Do not use markdown wrappers around the JSON.
+        `;
+
+        const aiResponse = await analyzeWithGemini(prompt);
+
+        if (aiResponse.startsWith("ERROR: ")) {
+            return res.status(400).json({ error: aiResponse.replace("ERROR: ", "") });
+        }
+
+        let parsedData = {};
+        try {
+            parsedData = JSON.parse(aiResponse.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, ''));
+        } catch (e) {
+            console.error("Could not parse AI JSON:", e, aiResponse);
+            return res.status(500).json({ error: 'Failed to generate resume from AI' });
+        }
+
+        res.json(parsedData);
+
+    } catch (error) {
+        console.error("Error generating resume from prompt:", error);
         res.status(500).json({ error: error.message });
     }
 });
