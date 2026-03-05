@@ -24,6 +24,14 @@
     @apply bg-gray-900/80 backdrop-blur-xl border border-white/20 shadow-2xl;
   }
 
+  .premium-auth-bg {
+    background:
+      radial-gradient(circle at 50% 50%, rgba(13, 20, 64, 1) 0%, rgba(10, 15, 45, 1) 100%),
+      radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 24px 24px;
+    background-color: #0d1440;
+  }
+
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-violet-400;
   }

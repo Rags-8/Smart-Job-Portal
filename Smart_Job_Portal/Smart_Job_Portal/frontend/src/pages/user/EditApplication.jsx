@@ -71,13 +71,13 @@ const EditApplication = () => {
     if (isFetching) {
         return (
             <div className="min-h-screen flex justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-[calc(100vh-5rem)] bg-transparent flex items-center justify-center p-4 sm:p-6 py-12">
+        <div className="min-h-[calc(100vh-5rem)] bg-gray-50 flex items-center justify-center p-4 sm:p-6 py-12">
             <div className="bg-white rounded-2xl shadow-2xl relative z-10 w-full max-w-2xl overflow-y-auto flex flex-col animate-slide-up">
                 {/* Header */}
                 <div className="p-6 sm:p-8 flex items-start justify-between border-b border-gray-100 bg-white z-10">
@@ -109,7 +109,7 @@ const EditApplication = () => {
                             <input
                                 type="text"
                                 required
-                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
+                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
                                 placeholder="John Doe"
                                 value={formData.full_name}
                                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
@@ -120,7 +120,7 @@ const EditApplication = () => {
                             <input
                                 type="email"
                                 required
-                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
+                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
                                 placeholder="john@example.com"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -134,7 +134,7 @@ const EditApplication = () => {
                             <input
                                 type="tel"
                                 required
-                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
+                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
                                 placeholder="+1 (555) 000-0000"
                                 value={formData.phone_number}
                                 onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
@@ -145,7 +145,7 @@ const EditApplication = () => {
                             <input
                                 type="text"
                                 required
-                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
+                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
                                 placeholder="e.g. 3 years"
                                 value={formData.experience}
                                 onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
@@ -158,7 +158,7 @@ const EditApplication = () => {
                             <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">GitHub URL</label>
                             <input
                                 type="url"
-                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
+                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
                                 placeholder="https://github.com/username"
                                 value={formData.github_url}
                                 onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
@@ -168,7 +168,7 @@ const EditApplication = () => {
                             <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">LinkedIn URL</label>
                             <input
                                 type="url"
-                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
+                                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900"
                                 placeholder="https://www.linkedin.com/in/username"
                                 value={formData.linkedin_url}
                                 onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
@@ -181,7 +181,7 @@ const EditApplication = () => {
                         <textarea
                             required
                             rows="2"
-                            className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900 resize-y"
+                            className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900 resize-y"
                             placeholder="List your most relevant skills (React, Python, Marketing...)"
                             value={formData.skills}
                             onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
@@ -193,7 +193,7 @@ const EditApplication = () => {
                         <textarea
                             required
                             rows="6"
-                            className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900 resize-y whitespace-pre-wrap"
+                            className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm bg-gray-50 hover:bg-white focus:bg-white font-medium text-gray-900 resize-y whitespace-pre-wrap"
                             placeholder="Paste the plain text of your entire resume here..."
                             value={formData.resume_url}
                             onChange={(e) => setFormData({ ...formData, resume_url: e.target.value })}
@@ -213,7 +213,7 @@ const EditApplication = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="px-8 py-3 border border-transparent text-sm font-extrabold rounded-xl shadow-lg text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 hover:-translate-y-0.5 transition-all flex items-center disabled:opacity-70 disabled:hover:translate-y-0"
+                            className="px-8 py-3 border border-transparent text-sm font-extrabold rounded-xl shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:-translate-y-0.5 transition-all flex items-center disabled:opacity-70 disabled:hover:translate-y-0"
                         >
                             {isLoading ? (
                                 <>

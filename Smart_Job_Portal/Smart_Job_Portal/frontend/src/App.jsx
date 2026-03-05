@@ -14,9 +14,11 @@ import Applicants from './pages/admin/Applicants';
 import ScreeningDashboard from './pages/admin/ScreeningDashboard';
 import Jobs from './pages/user/Jobs';
 import { JobDetails } from './pages/JobDetails';
+import { Home } from './pages/Home';
 import MyApplications from './pages/user/MyApplications';
 import EditApplication from './pages/user/EditApplication';
-import ResumeBuilder from './pages/user/ResumeBuilder'; import MyProfile from './pages/user/MyProfile';
+import ResumeBuilder from './pages/user/ResumeBuilder';
+import MyProfile from './pages/user/MyProfile';
 
 function App() {
   return (
@@ -26,7 +28,7 @@ function App() {
           <Navbar />
           <main>
             <Routes>
-              <Route path="/" element={<Navigate to="/jobs" replace />} />
+              <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
 

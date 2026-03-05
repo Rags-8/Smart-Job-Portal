@@ -48,50 +48,50 @@ export function JobListing() {
           </div>
         ) : (
           jobs.map((job) => (
-            <div key={job.id} className="card transition-all hover:shadow-md hover:-translate-y-1">
+            <Link key={job.id} to={`/jobs/${job.id}`} className="card block transition-all hover:shadow-lg hover:-translate-y-1 group">
               <div className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    {/* Placeholder for company logo if missing */}
-                    <div className="w-12 h-12 rounded-lg bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-xl">
-                      {job.companies?.name?.charAt(0) || 'C'}
+                    <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-xl group-hover:bg-violet-600 group-hover:text-white transition-colors">
+                      {job.company_name?.charAt(0) || 'C'}
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-slate-900 line-clamp-1">{job.title}</h3>
-                      <p className="text-sm text-slate-600">{job.companies?.name}</p>
+                      <p className="text-sm font-semibold text-violet-600">{job.company_name}</p>
                     </div>
                   </div>
+                  <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
+                    {new Date(job.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                  </span>
                 </div>
 
-                <div className="mt-4 space-y-2">
-                  <div className="flex items-center text-sm text-slate-500">
-                    <MapPin className="w-4 h-4 mr-2 text-slate-400" />
+                <div className="mt-5 flex flex-wrap gap-4">
+                  <div className="flex items-center text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                    <MapPin className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
                     {job.location}
                   </div>
-                  <div className="flex items-center text-sm text-slate-500">
-                    <Briefcase className="w-4 h-4 mr-2 text-slate-400" />
+                  <div className="flex items-center text-xs font-bold text-slate-500 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-100">
+                    <Briefcase className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
                     {job.job_type}
-                  </div>
-                  <div className="flex items-center text-sm text-slate-500">
-                    <DollarSign className="w-4 h-4 mr-2 text-slate-400" />
-                    {job.salary}
-                  </div>
-                  <div className="flex items-center text-sm text-slate-500">
-                    <Clock className="w-4 h-4 mr-2 text-slate-400" />
-                    Posted {new Date(job.created_at).toLocaleDateString()}
                   </div>
                 </div>
 
-                <div className="mt-6">
-                  <Link
-                    to={`/jobs/${job.id}`}
-                    className="w-full btn-secondary text-sm"
-                  >
-                    View Details
-                  </Link>
-                </div>
+                {job.skills_required && (
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {job.skills_required.split(',').slice(0, 3).map((skill, index) => (
+                      <span key={index} className="text-[11px] font-bold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-md">
+                        {skill.trim()}
+                      </span>
+                    ))}
+                    {job.skills_required.split(',').length > 3 && (
+                      <span className="text-[11px] font-bold text-slate-400 py-1">
+                        +{job.skills_required.split(',').length - 3} more
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>

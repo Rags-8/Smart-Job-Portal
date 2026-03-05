@@ -93,12 +93,12 @@ const Login = () => {
                 </div>
 
                 {/* Right Side - Typography */}
-                <div className="hidden md:flex w-full md:w-1/2 items-center justify-center p-6 lg:p-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
+                <div className="hidden md:flex w-full md:w-1/2 items-center justify-center p-6 lg:p-12 premium-auth-bg rounded-r-[2rem] animate-fade-in" style={{ animationDelay: '300ms' }}>
                     <div className="max-w-lg">
-                        <h1 className="text-5xl lg:text-6xl font-extrabold text-[#111827] tracking-tight leading-[1.15]">
+                        <h1 className="text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
                             Your next career <br /> move <br /> starts here.
                         </h1>
-                        <p className="mt-8 text-lg text-slate-500 font-medium leading-relaxed max-w-md">
+                        <p className="mt-8 text-lg text-slate-300 font-medium leading-relaxed max-w-md">
                             Join thousands of professionals who have already accelerated their careers with CareerLens.
                         </p>
                     </div>

@@ -13,7 +13,7 @@ router.get('/my', verifyAuth, async (req, res) => {
         );
 
         if (rows.length === 0) {
-            return res.status(404).json({ error: 'Resume not found' });
+            return res.status(200).json(null);
         }
 
         res.json(rows[0].resume_data);

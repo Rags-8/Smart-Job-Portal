@@ -9,9 +9,17 @@ const CRON_SCHEDULE = '0 * * * *';
 // Evaluate Application Score (Simple Text Match)
 // Normally, this could call Gemini, but using a robust text-matcher prevents API Key rate limits/errors for background tasks.
 const evaluateScore = (applicantSkills, jobSkills) => {
-    if (!jobSkills || jobSkills.trim() === '') return 75; // Default if no skills required
+    // Handle jobSkills if it's an array or string or null
+    let jobSkillsStr = '';
+    if (Array.isArray(jobSkills)) {
+        jobSkillsStr = jobSkills.join(', ');
+    } else if (typeof jobSkills === 'string') {
+        jobSkillsStr = jobSkills;
+    }
 
-    const requiredSkillsArr = jobSkills.split(',').map(s => s.trim().toLowerCase());
+    if (!jobSkillsStr || jobSkillsStr.trim() === '') return 75;
+
+    const requiredSkillsArr = jobSkillsStr.split(',').map(s => s.trim().toLowerCase());
     const applicantSkillsArr = applicantSkills ? applicantSkills.split(',').map(s => s.trim().toLowerCase()) : [];
 
     let matchCount = 0;
