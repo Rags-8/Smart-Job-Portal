@@ -25,7 +25,8 @@ const PostJob = () => {
         description: '',
         responsibilities: '',
         requirements: '',
-        benefits: ''
+        benefits: '',
+        category: 'Software'
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -136,17 +137,26 @@ const PostJob = () => {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Location *</label>
-                                        <input
-                                            type="text"
+                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Category *</label>
+                                        <select
                                             required
-                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
-                                            placeholder="e.g. New York, NY or Remote"
-                                            value={formData.location}
-                                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        />
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium cursor-pointer"
+                                            value={formData.category}
+                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        >
+                                            <option value="">Select Category</option>
+                                            <option>Software</option>
+                                            <option>Hardware</option>
+                                            <option>Designing</option>
+                                            <option>Sales</option>
+                                            <option>Product</option>
+                                            <option>Marketing</option>
+                                            <option>Finance</option>
+                                            <option>Healthcare</option>
+                                            <option>Education</option>
+                                            <option>Customer Service</option>
+                                        </select>
                                     </div>
-
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Employment Type *</label>
                                         <select
@@ -165,6 +175,17 @@ const PostJob = () => {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Location *</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
+                                            placeholder="e.g. New York, NY or Remote"
+                                            value={formData.location}
+                                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Experience Required *</label>
                                         <input
                                             type="text"
@@ -175,21 +196,20 @@ const PostJob = () => {
                                             onChange={(e) => setFormData({ ...formData, experience_required: e.target.value })}
                                         />
                                     </div>
+                                </div>
 
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Skills Required *</label>
                                         <input
                                             type="text"
                                             required
                                             className="appearance-none block w-full px-4 py-3.5 border border-gray-200 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all sm:text-sm bg-gray-50/50 hover:bg-white focus:bg-white shadow-sm font-medium text-gray-900"
-                                            placeholder="e.g. React, Node.js, Python (comma separated)"
+                                            placeholder="React, node.js, etc."
                                             value={formData.skills_required}
                                             onChange={(e) => setFormData({ ...formData, skills_required: e.target.value })}
                                         />
                                     </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Salary Component (INR) *</label>
                                         <input
@@ -201,7 +221,9 @@ const PostJob = () => {
                                             onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                                         />
                                     </div>
+                                </div>
 
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Number of Openings *</label>
                                         <input

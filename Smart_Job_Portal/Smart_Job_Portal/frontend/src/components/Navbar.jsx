@@ -14,7 +14,7 @@ const Navbar = () => {
 
     const isActive = (path) => location.pathname === path;
     const linkClass = (path) =>
-        `relative inline-flex items-center px-1 pt-1 text-sm font-semibold transition-colors duration-200 ${isActive(path) ? 'text-violet-600' : 'text-gray-600 hover:text-violet-500'
+        `relative inline-flex items-center px-1 pt-1 text-sm font-bold transition-colors duration-200 ${isActive(path) ? 'text-violet-700' : 'text-gray-700 hover:text-violet-600'
         } group`;
 
     return (
@@ -75,8 +75,8 @@ const Navbar = () => {
                         {user ? (
                             <div className="flex items-center space-x-6">
                                 <div className="flex flex-col text-right">
-                                    <span className="text-sm font-semibold text-gray-900">{user.name}</span>
-                                    <span className="text-xs text-violet-600 font-medium uppercase tracking-wider">{user.role}</span>
+                                    <span className="text-sm font-bold text-gray-900">{user.name}</span>
+                                    <span className="text-xs text-violet-700 font-extrabold uppercase tracking-wider">{user.role}</span>
                                 </div>
                                 <div className="h-8 w-px bg-gray-200"></div>
                                 <button

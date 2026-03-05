@@ -8,7 +8,7 @@ const ResumePreview = ({ resumeData }) => {
         const lines = text.split('\n').filter(line => line.trim() !== '');
         if (lines.length > 1 || text.includes('•') || text.includes('- ')) {
             return (
-                <ul className="list-disc list-outside ml-4 mt-1 space-y-0.5 text-gray-800">
+                <ul className="list-disc list-outside ml-4 mt-1 space-y-0.5 text-gray-700">
                     {lines.map((line, i) => {
                         const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
                         return cleanLine ? <li key={i}>{cleanLine}</li> : null;
@@ -16,7 +16,7 @@ const ResumePreview = ({ resumeData }) => {
                 </ul>
             );
         }
-        return <p className="mt-1 text-gray-800">{text}</p>;
+        return <p className="mt-1 text-gray-700">{text}</p>;
     };
 
     const renderSkillCategory = (title, categorySkills) => {
@@ -24,7 +24,7 @@ const ResumePreview = ({ resumeData }) => {
         return (
             <div className="mb-1">
                 <span className="font-bold text-gray-900 mr-2">{title}:</span>
-                <span className="text-gray-800">{categorySkills.join(', ')}</span>
+                <span className="text-gray-700">{categorySkills.join(', ')}</span>
             </div>
         );
     };
@@ -37,11 +37,11 @@ const ResumePreview = ({ resumeData }) => {
                 <div id="print-area" className="w-full h-full p-8 md:p-10 bg-white print:p-0 aspect-[1/1.414] mx-auto overflow-y-auto custom-scrollbar font-['Inter',sans-serif] text-[11pt] leading-snug">
 
                     {/* 1. HEADER SECTION */}
-                    <header className="mb-4 text-center">
-                        <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-tight mb-1">{personal.fullName || 'YOUR NAME'}</h1>
-                        {personal.jobTitle && <h2 className="text-lg font-semibold text-gray-700 uppercase mb-2">{personal.jobTitle}</h2>}
+                    <header className="mb-6 text-center border-b border-gray-100 pb-6">
+                        <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-tight mb-2">{personal.fullName || 'YOUR NAME'}</h1>
+                        {personal.jobTitle && <h2 className="text-lg font-bold text-gray-800 uppercase mb-3 tracking-wide">{personal.jobTitle}</h2>}
 
-                        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10pt] text-gray-700">
+                        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[10pt] text-gray-600 font-medium">
                             {personal.email && (
                                 <span className="flex items-center"><svg className="w-3.5 h-3.5 mr-1 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>{personal.email}</span>
                             )}
@@ -62,17 +62,17 @@ const ResumePreview = ({ resumeData }) => {
 
                     {/* 2. PROFESSIONAL SUMMARY */}
                     {personal.summary && (
-                        <section className="mb-4">
-                            <h3 className="text-[11pt] font-bold text-gray-900 border-b border-gray-300 pb-0.5 mb-2 uppercase tracking-wide">Professional Summary</h3>
-                            <p className="text-gray-800 text-[10pt] text-justify">{personal.summary}</p>
+                        <section className="mb-6">
+                            <h3 className="text-[11pt] font-semibold text-gray-800 border-b border-gray-100 pb-1 mb-2 uppercase tracking-wide">Professional Summary</h3>
+                            <p className="text-gray-700 text-[10pt] text-justify leading-normal">{personal.summary}</p>
                         </section>
                     )}
 
                     {/* 3. TECHNICAL SKILLS */}
                     {hasSkills && (
-                        <section className="mb-4">
-                            <h3 className="text-[11pt] font-bold text-gray-900 border-b border-gray-300 pb-0.5 mb-2 uppercase tracking-wide">Technical Skills</h3>
-                            <div className="text-[10pt]">
+                        <section className="mb-6">
+                            <h3 className="text-[11pt] font-semibold text-gray-800 border-b border-gray-100 pb-1 mb-2 uppercase tracking-wide">Technical Skills</h3>
+                            <div className="text-[10pt] text-gray-700 space-y-1">
                                 {renderSkillCategory('Languages/Frontend', skills.frontend)}
                                 {renderSkillCategory('Backend/Frameworks', skills.backend)}
                                 {renderSkillCategory('Databases', skills.database)}
@@ -83,9 +83,9 @@ const ResumePreview = ({ resumeData }) => {
 
                     {/* 4. PROJECTS */}
                     {projects.length > 0 && (
-                        <section className="mb-4">
-                            <h3 className="text-[11pt] font-bold text-gray-900 border-b border-gray-300 pb-0.5 mb-2 uppercase tracking-wide">Projects</h3>
-                            <div className="space-y-3">
+                        <section className="mb-6">
+                            <h3 className="text-[11pt] font-semibold text-gray-800 border-b border-gray-100 pb-1 mb-2 uppercase tracking-wide">Projects</h3>
+                            <div className="space-y-4">
                                 {projects.map((proj, i) => (
                                     <div key={i}>
                                         <div className="flex justify-between items-baseline mb-0.5">
@@ -102,16 +102,16 @@ const ResumePreview = ({ resumeData }) => {
 
                     {/* 5. EXPERIENCE (OPTIONAL) */}
                     {experience.length > 0 && (
-                        <section className="mb-4">
-                            <h3 className="text-[11pt] font-bold text-gray-900 border-b border-gray-300 pb-0.5 mb-2 uppercase tracking-wide">Experience</h3>
-                            <div className="space-y-3">
+                        <section className="mb-6">
+                            <h3 className="text-[11pt] font-semibold text-gray-800 border-b border-gray-100 pb-1 mb-2 uppercase tracking-wide">Experience</h3>
+                            <div className="space-y-4">
                                 {experience.map((exp, i) => (
                                     <div key={i}>
                                         <div className="flex justify-between items-baseline">
                                             <h4 className="font-bold text-gray-900 text-[10.5pt]">{exp.role || 'Job Role'}</h4>
-                                            <span className="text-[10pt] font-semibold text-gray-700">{exp.duration}</span>
+                                            <span className="text-[10pt] font-medium text-gray-600">{exp.duration}</span>
                                         </div>
-                                        <div className="text-[10pt] italic text-gray-800 mb-1">{exp.company}</div>
+                                        <div className="text-[10pt] italic text-gray-700 mb-1">{exp.company}</div>
                                         <div className="text-[10pt]">
                                             {renderBulletPoints(exp.description)}
                                         </div>
@@ -123,16 +123,16 @@ const ResumePreview = ({ resumeData }) => {
 
                     {/* 6. EDUCATION */}
                     {education.length > 0 && (
-                        <section className="mb-4">
-                            <h3 className="text-[11pt] font-bold text-gray-900 border-b border-gray-300 pb-0.5 mb-2 uppercase tracking-wide">Education</h3>
-                            <div className="space-y-2">
+                        <section className="mb-6">
+                            <h3 className="text-[11pt] font-semibold text-gray-800 border-b border-gray-100 pb-1 mb-2 uppercase tracking-wide">Education</h3>
+                            <div className="space-y-3">
                                 {education.map((edu, i) => (
                                     <div key={i} className="flex justify-between items-baseline">
                                         <div>
                                             <h4 className="font-bold text-gray-900 text-[10.5pt]">{edu.degree || 'Degree'}</h4>
-                                            <div className="text-[10pt] text-gray-800">{edu.college}</div>
+                                            <div className="text-[10pt] text-gray-700">{edu.college}</div>
                                         </div>
-                                        <div className="text-[10pt] font-semibold text-gray-700">{edu.year}</div>
+                                        <div className="text-[10pt] font-medium text-gray-600">{edu.year}</div>
                                     </div>
                                 ))}
                             </div>
@@ -141,12 +141,12 @@ const ResumePreview = ({ resumeData }) => {
 
                     {/* 7. CERTIFICATIONS (OPTIONAL) */}
                     {certifications.length > 0 && (
-                        <section className="mb-4">
-                            <h3 className="text-[11pt] font-bold text-gray-900 border-b border-gray-300 pb-0.5 mb-2 uppercase tracking-wide">Certifications</h3>
-                            <ul className="list-disc list-outside ml-4 mt-1 space-y-0.5 text-[10pt] text-gray-800">
+                        <section className="mb-6">
+                            <h3 className="text-[11pt] font-semibold text-gray-800 border-b border-gray-100 pb-1 mb-2 uppercase tracking-wide">Certifications</h3>
+                            <ul className="list-disc list-outside ml-4 mt-1 space-y-0.5 text-[10pt] text-gray-700">
                                 {certifications.map((cert, i) => (
                                     <li key={i}>
-                                        <span className="font-semibold text-gray-900">{cert.name}</span>
+                                        <span className="font-semibold text-gray-800">{cert.name}</span>
                                         {cert.issuer && <span> — {cert.issuer}</span>}
                                     </li>
                                 ))}
@@ -156,9 +156,9 @@ const ResumePreview = ({ resumeData }) => {
 
                     {/* 8. ACHIEVEMENTS (OPTIONAL) */}
                     {achievements.length > 0 && (
-                        <section className="mb-4">
-                            <h3 className="text-[11pt] font-bold text-gray-900 border-b border-gray-300 pb-0.5 mb-2 uppercase tracking-wide">Achievements & Extracurriculars</h3>
-                            <ul className="list-disc list-outside ml-4 mt-1 space-y-0.5 text-[10pt] text-gray-800">
+                        <section className="mb-6">
+                            <h3 className="text-[11pt] font-semibold text-gray-800 border-b border-gray-100 pb-1 mb-2 uppercase tracking-wide">Achievements & Extracurriculars</h3>
+                            <ul className="list-disc list-outside ml-4 mt-1 space-y-0.5 text-[10pt] text-gray-700">
                                 {achievements.map((achiev, i) => (
                                     <li key={i}>{achiev.description}</li>
                                 ))}

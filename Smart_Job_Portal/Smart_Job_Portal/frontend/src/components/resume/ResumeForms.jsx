@@ -85,10 +85,12 @@ const ResumeForms = ({ currentStep, setCurrentStep, resumeData, updateData }) =>
                     <input type="url" name="linkedin" value={resumeData.personal.linkedin} onChange={handlePersonalChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-medium text-gray-900" placeholder="https://linkedin.com/in/..." />
                 </div>
                 <div>
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Portfolio URL (Optional)</label>
-                        <input type="url" name="portfolio" value={resumeData.personal.portfolio} onChange={handlePersonalChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-medium text-gray-900" placeholder="https://portfolio.com/..." />
-                    </div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">GitHub URL (Optional)</label>
+                    <input type="url" name="github" value={resumeData.personal.github} onChange={handlePersonalChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-medium text-gray-900" placeholder="https://github.com/..." />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Portfolio URL (Optional)</label>
+                    <input type="url" name="portfolio" value={resumeData.personal.portfolio} onChange={handlePersonalChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-medium text-gray-900" placeholder="https://portfolio.com/..." />
                 </div>
             </div>
         </div>

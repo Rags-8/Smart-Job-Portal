@@ -45,7 +45,7 @@ function App() {
               <Route path="/my-applications" element={<ProtectedRoute roleRequired="user"><MyApplications /></ProtectedRoute>} />
               <Route path="/my-profile" element={<ProtectedRoute roleRequired="user"><MyProfile /></ProtectedRoute>} />
               <Route path="/edit-application/:id" element={<ProtectedRoute roleRequired="user"><EditApplication /></ProtectedRoute>} />
-              <Route path="/resume-builder" element={<ProtectedRoute roleRequired="user"><ResumeBuilder /></ProtectedRoute>} />
+              <Route path="/resume-builder/:id?" element={<ProtectedRoute roleRequired="user"><ResumeBuilder /></ProtectedRoute>} />
             </Routes>
           </main>
         </div>

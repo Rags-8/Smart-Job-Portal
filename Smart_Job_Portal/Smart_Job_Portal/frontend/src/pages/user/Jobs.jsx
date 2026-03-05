@@ -15,7 +15,8 @@ const Jobs = () => {
         jobType: '',
         experience: '',
         location: '',
-        skills: ''
+        skills: '',
+        category: ''
     });
 
     useEffect(() => {
@@ -37,6 +38,7 @@ const Jobs = () => {
     const availableJobTypes = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Freelance'];
     const availableExpLevels = ['0–1 year', '1–2 years', '2–3 years', '3–4 years', '4–5 years', '5+ years'];
     const availableSkills = ['React', 'Node.js', 'Python', 'Java', 'UI/UX', 'Marketing', 'Sales', 'Data Analysis', 'SQL'];
+    const availableCategories = ['Software', 'Hardware', 'Designing', 'Sales', 'Product', 'Marketing', 'Finance', 'Healthcare', 'Education', 'Customer Service'];
 
     // Get unique locations from jobs, adding 'Remote' if not present
     const availableLocations = [...new Set(['Remote', ...jobs.map(j => j.location).filter(Boolean)])];
@@ -60,8 +62,9 @@ const Jobs = () => {
         const matchesLocation = !filters.location || job.location?.toLowerCase().includes(filters.location.toLowerCase());
         const matchesSkills = !filters.skills ||
             (job.skills_required && job.skills_required.some(s => s.toLowerCase().includes(filters.skills.toLowerCase())));
+        const matchesCategory = !filters.category || job.category === filters.category;
 
-        return matchesSearch && matchesType && matchesExp && matchesLocation && matchesSkills;
+        return matchesSearch && matchesType && matchesExp && matchesLocation && matchesSkills && matchesCategory;
     });
 
     const isJobExpired = (dateString) => {
@@ -103,6 +106,21 @@ const Jobs = () => {
                     </div>
 
                     <div className="space-y-6">
+                        {/* Category Filter Dropdown */}
+                        <div>
+                            <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Category</h3>
+                            <select
+                                className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm font-medium rounded-lg focus:ring-violet-500 focus:border-violet-500 block p-2.5 outline-none"
+                                value={filters.category}
+                                onChange={(e) => handleFilterChange('category', e.target.value)}
+                            >
+                                <option value="">Any Category</option>
+                                {availableCategories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+
                         {/* Job Type Filter Dropdown */}
                         {availableJobTypes.length > 0 && (
                             <div>
@@ -170,7 +188,7 @@ const Jobs = () => {
                                 <div className="text-center p-8 bg-white border border-gray-200 rounded-2xl border-dashed">
                                     <p className="text-gray-500 font-medium">No jobs match your filters.</p>
                                     <button
-                                        onClick={() => { setSearchQuery(''); setFilters({ jobType: '', experience: '', location: '', skills: '' }) }}
+                                        onClick={() => { setSearchQuery(''); setFilters({ jobType: '', experience: '', location: '', skills: '', category: '' }) }}
                                         className="mt-4 text-violet-600 font-bold hover:underline"
                                     >Clear all filters</button>
                                 </div>

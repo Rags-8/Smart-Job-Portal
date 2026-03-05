@@ -24,15 +24,15 @@ router.post('/', verifyAuth, verifyAdmin, async (req, res) => {
                 title, location, salary, job_type, description, admin_id,
                 company_name, company_website, company_description,
                 experience_required, skills_required, number_of_openings,
-                application_last_date, responsibilities, requirements, benefits
+                application_last_date, responsibilities, requirements, benefits, category
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
             RETURNING *
         `, [
             title, location, salary, job_type, description, req.user.id,
             company_name, company_website, company_description,
             experience_required, skills_required, number_of_openings,
-            application_last_date, responsibilities, requirements, benefits
+            application_last_date, responsibilities, requirements, benefits, category
         ]);
 
         res.status(201).json(rows[0]);
@@ -122,14 +122,15 @@ router.put('/:id', verifyAuth, verifyAdmin, async (req, res) => {
             SET title = $1, location = $2, salary = $3, job_type = $4, description = $5,
                 company_name = $6, company_website = $7, company_description = $8,
                 experience_required = $9, skills_required = $10, number_of_openings = $11,
-                application_last_date = $12, responsibilities = $13, requirements = $14, benefits = $15
-            WHERE id = $16
+                application_last_date = $12, responsibilities = $13, requirements = $14, benefits = $15,
+                category = $16
+            WHERE id = $17
             RETURNING *
         `, [
             title, location, salary, job_type, description,
             company_name, company_website, company_description,
             experience_required, skills_required, number_of_openings,
-            application_last_date, responsibilities, requirements, benefits,
+            application_last_date, responsibilities, requirements, benefits, category,
             jobId
         ]);
 
