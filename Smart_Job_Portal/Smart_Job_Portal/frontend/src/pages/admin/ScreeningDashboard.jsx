@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import api from '../../api/axios';
-import { ChevronDown, Search, CheckCircle, XCircle, FileText, Download, Briefcase, Star, TrendingUp, Filter } from 'lucide-react';
+import { ChevronDown, Search, CheckCircle, XCircle, FileText, Briefcase, Star, TrendingUp, Filter, AlertCircle, Loader } from 'lucide-react';
+
+const THRESHOLD = 70;
 
 const ScreeningDashboard = () => {
     const [jobs, setJobs] = useState([]);
@@ -9,7 +11,6 @@ const ScreeningDashboard = () => {
     const [loadingJobs, setLoadingJobs] = useState(true);
     const [loadingCandidates, setLoadingCandidates] = useState(false);
     const [selectedCandidate, setSelectedCandidate] = useState(null);
-    const [autoShortlist, setAutoShortlist] = useState(false);
 
     // Sort logic
     const [sortOrder, setSortOrder] = useState('desc');
@@ -45,50 +46,39 @@ const ScreeningDashboard = () => {
         setLoadingCandidates(true);
         setSelectedCandidate(null);
         try {
-            const { data } = await api.get(`/applications/job/${jobId}`);
+            const { data: applications } = await api.get(`/applications/job/${jobId}`);
 
-            const currentJob = jobs.find(j => j.id === jobId);
-            const jobSkills = currentJob?.skills_required || [];
-
-            // Enhance with mock AI data since real endpoint doesn't exist
-            const enhancedCandidates = data.map(app => {
-                const applicantSkills = (app.skills || '').split(',').map(s => s.trim().toLowerCase());
-                const mappedJobSkills = jobSkills.map(s => s.toLowerCase());
-
-                let matchCount = 0;
-                let matched = [];
-                let missing = [];
-
-                mappedJobSkills.forEach(reqSkill => {
-                    // Simple substring matching for mock purposes
-                    if (applicantSkills.some(as => as.includes(reqSkill) || reqSkill.includes(as))) {
-                        matchCount++;
-                        matched.push(reqSkill);
-                    } else {
-                        missing.push(reqSkill);
+            // For each application, fetch the AI match result
+            const enhancedCandidates = await Promise.all(applications.map(async (app) => {
+                try {
+                    const { data: matchData } = await api.get(`/ai/match-result/${app.id}`);
+                    if (matchData) {
+                        return {
+                            ...app,
+                            aiData: {
+                                matchScore: matchData.match_percentage || 0,
+                                matchedSkills: matchData.matched_skills || [],
+                                missingSkills: matchData.missing_skills || [],
+                                fitLevel: matchData.fit_level || 'Not Evaluated',
+                                screened: true
+                            }
+                        };
                     }
-                });
-
-                // Generate a base score, slightly randomized but anchored to skill match
-                const baseScore = jobSkills.length > 0 ? (matchCount / jobSkills.length) * 100 : Math.floor(Math.random() * 40) + 60;
-                // Add some random fuzziness so it looks realistic
-                const finalScore = Math.min(100, Math.max(0, Math.round(baseScore + (Math.random() * 20 - 10))));
-
-                let recommendation = 'Consider for review.';
-                if (finalScore >= 80) recommendation = 'Highly recommended based on strong skill alignment and experience match.';
-                else if (finalScore >= 60) recommendation = 'Good potential, but missing some key required skills. Technical interview advised.';
-                else recommendation = 'Does not meet core requirements. Consider for junior roles or reject.';
-
+                } catch (e) {
+                    // match result not available yet
+                }
+                // No AI data yet — screening pending
                 return {
                     ...app,
-                    mockAiData: {
-                        matchScore: finalScore,
-                        matchedSkills: matched.length > 0 ? matched : ['General Tech'],
-                        missingSkills: missing,
-                        recommendation
+                    aiData: {
+                        matchScore: null,
+                        matchedSkills: [],
+                        missingSkills: [],
+                        fitLevel: 'Pending',
+                        screened: false
                     }
                 };
-            });
+            }));
 
             setCandidates(enhancedCandidates);
         } catch (error) {
@@ -102,8 +92,6 @@ const ScreeningDashboard = () => {
         try {
             const { data } = await api.put(`/applications/${id}/status`, { status });
             setCandidates(prev => prev.map(app => app.id === id ? { ...app, status: data.status } : app));
-
-            // Also update selected candidate if it's the one we are viewing
             if (selectedCandidate && selectedCandidate.id === id) {
                 setSelectedCandidate(prev => ({ ...prev, status: data.status }));
             }
@@ -114,26 +102,27 @@ const ScreeningDashboard = () => {
 
     const selectedJobDetails = jobs.find(j => j.id === selectedJobId);
 
-    // Sorting logic
     const sortedCandidates = [...candidates].sort((a, b) => {
-        if (sortOrder === 'desc') {
-            return b.mockAiData.matchScore - a.mockAiData.matchScore;
-        } else {
-            return a.mockAiData.matchScore - b.mockAiData.matchScore;
-        }
+        const scoreA = a.aiData.matchScore ?? -1;
+        const scoreB = b.aiData.matchScore ?? -1;
+        return sortOrder === 'desc' ? scoreB - scoreA : scoreA - scoreB;
     });
 
-    // Auto-shortlist logic (mock UI only)
-    useEffect(() => {
-        if (autoShortlist && sortedCandidates.length > 0) {
-            sortedCandidates.forEach(cand => {
-                if (cand.mockAiData.matchScore >= 70 && cand.status === 'applied') {
-                    handleStatusUpdate(cand.id, 'Shortlisted');
-                }
-            });
-        }
-    }, [autoShortlist, sortedCandidates.length]);
+    const screenedCount = candidates.filter(c => c.aiData.screened).length;
+    const selectedCount = candidates.filter(c => c.status === 'Selected').length;
+    const rejectedCount = candidates.filter(c => c.status === 'Rejected').length;
 
+    const getScoreColor = (score) => {
+        if (score === null) return 'text-gray-400';
+        if (score >= THRESHOLD) return 'text-emerald-600';
+        return 'text-red-500';
+    };
+
+    const getBarColor = (score) => {
+        if (score === null) return 'bg-gray-300';
+        if (score >= THRESHOLD) return 'bg-emerald-500';
+        return 'bg-red-500';
+    };
 
     return (
         <div className="min-h-[calc(100vh-5rem)] bg-transparent font-['Inter',sans-serif] flex flex-col">
@@ -144,7 +133,9 @@ const ScreeningDashboard = () => {
                         <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight flex items-center">
                             <Star className="w-6 h-6 mr-2 text-violet-600" /> AI Screening Dashboard
                         </h1>
-                        <p className="text-sm font-medium text-gray-500 mt-1">Automatically evaluate and rank applicants based on job requirements.</p>
+                        <p className="text-sm font-medium text-gray-500 mt-1">
+                            Automatically evaluated applications — threshold: <span className="font-bold text-violet-600">{THRESHOLD}% match</span>.
+                        </p>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -172,7 +163,7 @@ const ScreeningDashboard = () => {
                 {/* Left Area: Summary + Table */}
                 <div className="lg:col-span-8 flex flex-col gap-6 h-[calc(100vh-11rem)]">
 
-                    {/* Job Summary Card */}
+                    {/* Stats & Job Summary Card */}
                     {selectedJobDetails && (
                         <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm shrink-0">
                             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -181,21 +172,24 @@ const ScreeningDashboard = () => {
                                         <Briefcase className="w-5 h-5 mr-2 text-gray-400" /> {selectedJobDetails.title}
                                     </h2>
                                     <div className="flex flex-wrap gap-2 mt-2">
-                                        <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded border border-gray-200">
-                                            Req Exp: {selectedJobDetails.experience_required || 'Not specified'}
-                                        </span>
                                         <span className="bg-violet-50 text-violet-700 text-xs font-bold px-2.5 py-1 rounded border border-violet-100 flex items-center">
                                             <TrendingUp className="w-3 h-3 mr-1" /> {candidates.length} Applicants
+                                        </span>
+                                        <span className="bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded border border-blue-100">
+                                            {screenedCount} Screened
+                                        </span>
+                                        <span className="bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded border border-emerald-100">
+                                            ✓ {selectedCount} Selected
+                                        </span>
+                                        <span className="bg-red-50 text-red-700 text-xs font-bold px-2.5 py-1 rounded border border-red-100">
+                                            ✗ {rejectedCount} Rejected
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col items-end">
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" className="sr-only peer" checked={autoShortlist} onChange={() => setAutoShortlist(!autoShortlist)} />
-                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
-                                        <span className="ml-3 text-sm font-bold text-gray-700">Auto-Shortlist &gt;70%</span>
-                                    </label>
+                                <div className="flex items-center gap-2 bg-violet-50 border border-violet-100 rounded-xl px-4 py-2">
+                                    <Star className="w-4 h-4 text-violet-600" />
+                                    <span className="text-sm font-bold text-violet-700">Auto-Screening Active (≥{THRESHOLD}% → Selected)</span>
                                 </div>
                             </div>
                         </div>
@@ -204,7 +198,7 @@ const ScreeningDashboard = () => {
                     {/* Candidate Table */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex-1 flex flex-col overflow-hidden">
                         <div className="border-b border-gray-200 p-4 bg-gray-50 flex items-center justify-between shrink-0">
-                            <h3 className="font-bold text-gray-900">Ranked Candidates</h3>
+                            <h3 className="font-bold text-gray-900">AI-Screened Candidates</h3>
                             <button
                                 onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
                                 className="text-sm font-semibold text-gray-600 hover:text-violet-600 flex items-center transition-colors"
@@ -229,7 +223,7 @@ const ScreeningDashboard = () => {
                                         <tr className="text-xs font-bold text-gray-500 uppercase tracking-widest bg-gray-50">
                                             <th className="px-6 py-4 font-bold">Candidate</th>
                                             <th className="px-6 py-4 font-bold">AI Match Score</th>
-                                            <th className="px-6 py-4 font-bold">Key Skills</th>
+                                            <th className="px-6 py-4 font-bold">Fit Level</th>
                                             <th className="px-6 py-4 font-bold">Status</th>
                                         </tr>
                                     </thead>
@@ -247,39 +241,32 @@ const ScreeningDashboard = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className={`text-sm font-extrabold w-8 ${cand.mockAiData.matchScore >= 80 ? 'text-emerald-600' :
-                                                            cand.mockAiData.matchScore >= 60 ? 'text-amber-500' : 'text-red-500'
-                                                            }`}>
-                                                            {cand.mockAiData.matchScore}%
-                                                        </span>
-                                                        <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                            <div
-                                                                className={`h-full rounded-full ${cand.mockAiData.matchScore >= 80 ? 'bg-emerald-500' :
-                                                                    cand.mockAiData.matchScore >= 60 ? 'bg-amber-400' : 'bg-red-500'
-                                                                    }`}
-                                                                style={{ width: `${cand.mockAiData.matchScore}%` }}
-                                                            ></div>
+                                                    {cand.aiData.screened ? (
+                                                        <div className="flex items-center gap-3">
+                                                            <span className={`text-sm font-extrabold w-10 ${getScoreColor(cand.aiData.matchScore)}`}>
+                                                                {cand.aiData.matchScore}%
+                                                            </span>
+                                                            <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className={`h-full rounded-full ${getBarColor(cand.aiData.matchScore)}`}
+                                                                    style={{ width: `${cand.aiData.matchScore}%` }}
+                                                                ></div>
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold">
+                                                            <Loader className="w-4 h-4 animate-spin" /> Pending
+                                                        </div>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 hidden sm:table-cell">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {cand.mockAiData.matchedSkills.slice(0, 2).map((skill, i) => (
-                                                            <span key={i} className="text-[0.65rem] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded uppercase tracking-wider">
-                                                                {skill}
-                                                            </span>
-                                                        ))}
-                                                        {cand.mockAiData.matchedSkills.length > 2 && (
-                                                            <span className="text-[0.65rem] font-bold px-1 py-0.5 text-gray-400">+{cand.mockAiData.matchedSkills.length - 2}</span>
-                                                        )}
-                                                    </div>
+                                                    <span className="text-xs font-bold text-gray-700">{cand.aiData.fitLevel || '—'}</span>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex px-2.5 py-1 rounded-full text-[0.7rem] font-extrabold uppercase tracking-wide border ${cand.status === 'Selected' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                        cand.status === 'Shortlisted' ? 'bg-violet-50 text-violet-700 border-violet-200' :
-                                                            cand.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200' :
-                                                                'bg-gray-100 text-gray-600 border-gray-200'
+                                                            cand.status === 'Shortlisted' ? 'bg-violet-50 text-violet-700 border-violet-200' :
+                                                                cand.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                                    'bg-gray-100 text-gray-600 border-gray-200'
                                                         }`}>
                                                         {cand.status}
                                                     </span>
@@ -312,44 +299,72 @@ const ScreeningDashboard = () => {
                                         <h2 className="text-xl font-extrabold text-gray-900">{selectedCandidate.full_name || selectedCandidate.applicant_name}</h2>
                                         <p className="text-sm font-medium text-gray-500">{selectedCandidate.email || selectedCandidate.applicant_email}</p>
                                     </div>
-                                    <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-extrabold border-4 ${selectedCandidate.mockAiData.matchScore >= 80 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                        selectedCandidate.mockAiData.matchScore >= 60 ? 'bg-amber-50 text-amber-500 border-amber-100' :
-                                            'bg-red-50 text-red-500 border-red-100'
-                                        }`}>
-                                        {selectedCandidate.mockAiData.matchScore}
-                                    </div>
+                                    {selectedCandidate.aiData.screened ? (
+                                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-extrabold border-4 ${selectedCandidate.aiData.matchScore >= THRESHOLD
+                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                : 'bg-red-50 text-red-500 border-red-100'
+                                            }`}>
+                                            {selectedCandidate.aiData.matchScore}
+                                        </div>
+                                    ) : (
+                                        <div className="w-14 h-14 rounded-full flex items-center justify-center border-4 bg-gray-50 border-gray-100">
+                                            <Loader className="w-6 h-6 text-gray-400 animate-spin" />
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">AI Recommendation</h4>
-                                    <p className="text-sm font-semibold text-gray-800 leading-relaxed">
-                                        {selectedCandidate.mockAiData.recommendation}
-                                    </p>
-                                </div>
+                                {/* Screening Result Banner */}
+                                {selectedCandidate.aiData.screened ? (
+                                    <div className={`p-4 rounded-xl border ${selectedCandidate.aiData.matchScore >= THRESHOLD
+                                            ? 'bg-emerald-50 border-emerald-200'
+                                            : 'bg-red-50 border-red-200'
+                                        }`}>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {selectedCandidate.aiData.matchScore >= THRESHOLD
+                                                ? <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                                : <XCircle className="w-4 h-4 text-red-600" />
+                                            }
+                                            <h4 className={`text-sm font-bold ${selectedCandidate.aiData.matchScore >= THRESHOLD ? 'text-emerald-700' : 'text-red-700'}`}>
+                                                {selectedCandidate.aiData.matchScore >= THRESHOLD
+                                                    ? `Selected — ${selectedCandidate.aiData.matchScore}% Match`
+                                                    : `Rejected — ${selectedCandidate.aiData.matchScore}% Match (below ${THRESHOLD}% threshold)`
+                                                }
+                                            </h4>
+                                        </div>
+                                        <p className="text-xs font-semibold text-gray-600 ml-6">{selectedCandidate.aiData.fitLevel}</p>
+                                    </div>
+                                ) : (
+                                    <div className="p-4 rounded-xl border bg-yellow-50 border-yellow-200 flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4 text-yellow-600" />
+                                        <p className="text-sm font-semibold text-yellow-700">AI screening in progress. Please refresh shortly.</p>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Scrollable Details */}
                             <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-                                <div>
-                                    <h4 className="flex items-center text-sm font-bold text-emerald-700 mb-3">
-                                        <CheckCircle className="w-4 h-4 mr-2" /> Matched Required Skills
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        {selectedCandidate.mockAiData.matchedSkills.map((skill, i) => (
-                                            <span key={i} className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded">
-                                                {skill}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {selectedCandidate.mockAiData.missingSkills.length > 0 && (
+                                {selectedCandidate.aiData.matchedSkills.length > 0 && (
                                     <div>
-                                        <h4 className="flex items-center text-sm font-bold text-red-700 mb-3 mt-6">
+                                        <h4 className="flex items-center text-sm font-bold text-emerald-700 mb-3">
+                                            <CheckCircle className="w-4 h-4 mr-2" /> Matched Skills
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedCandidate.aiData.matchedSkills.map((skill, i) => (
+                                                <span key={i} className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded">
+                                                    {skill}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedCandidate.aiData.missingSkills.length > 0 && (
+                                    <div>
+                                        <h4 className="flex items-center text-sm font-bold text-red-700 mb-3">
                                             <XCircle className="w-4 h-4 mr-2" /> Missing Required Skills
                                         </h4>
                                         <div className="flex flex-wrap gap-2">
-                                            {selectedCandidate.mockAiData.missingSkills.map((skill, i) => (
+                                            {selectedCandidate.aiData.missingSkills.map((skill, i) => (
                                                 <span key={i} className="text-xs font-bold text-red-800 bg-red-100 px-2.5 py-1 rounded">
                                                     {skill}
                                                 </span>
@@ -358,7 +373,7 @@ const ScreeningDashboard = () => {
                                     </div>
                                 )}
 
-                                <div className="mt-8">
+                                <div className="mt-4">
                                     <h4 className="flex items-center text-sm font-bold text-gray-900 mb-3 border-t border-gray-100 pt-6">
                                         <FileText className="w-4 h-4 mr-2 text-gray-400" /> Resume Preview
                                     </h4>
@@ -376,7 +391,14 @@ const ScreeningDashboard = () => {
 
                             {/* Actions Footer */}
                             <div className="p-4 border-t border-gray-200 bg-gray-50 flex flex-col gap-3 shrink-0">
+                                <p className="text-xs text-center text-gray-400 font-medium">Override AI decision manually:</p>
                                 <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleStatusUpdate(selectedCandidate.id, 'Selected')}
+                                        className="flex-1 px-4 py-2.5 font-bold text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                                    >
+                                        ✓ Select
+                                    </button>
                                     <button
                                         onClick={() => handleStatusUpdate(selectedCandidate.id, 'Shortlisted')}
                                         className="flex-1 px-4 py-2.5 font-bold text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
@@ -385,14 +407,11 @@ const ScreeningDashboard = () => {
                                     </button>
                                     <button
                                         onClick={() => handleStatusUpdate(selectedCandidate.id, 'Rejected')}
-                                        className="flex-1 px-4 py-2.5 font-bold text-sm bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+                                        className="flex-1 px-4 py-2.5 font-bold text-sm bg-white border border-gray-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
                                     >
-                                        Reject
+                                        ✗ Reject
                                     </button>
                                 </div>
-                                <button className="w-full flex items-center justify-center px-4 py-2 font-bold text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                                    <Download className="w-4 h-4 mr-2" /> Download Report
-                                </button>
                             </div>
                         </>
                     )}

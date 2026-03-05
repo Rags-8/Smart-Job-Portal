@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { verifyAuth } = require('./auth');
-const supabase = require('../db');
+const db = require('../db');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -10,7 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 async function analyzeWithGemini(prompt) {
     if (!process.env.GEMINI_API_KEY) return 'ERROR: AI Integration Unavailable. Please add GEMINI_API_KEY.';
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
         const result = await model.generateContent(prompt);
         const response = await result.response;
         return response.text();
@@ -398,6 +399,25 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
     } catch (error) {
         console.error('[Resume Generation] Crash Error:', error);
         res.status(500).json({ error: 'Deep AI processing error. Please try again.' });
+    }
+});
+
+
+// 5. Get AI Match Result for an application
+router.get('/match-result/:applicationId', verifyAuth, async (req, res) => {
+    try {
+        const { applicationId } = req.params;
+        const { rows } = await db.query(
+            'SELECT * FROM job_match_results WHERE application_id = $1 ORDER BY created_at DESC LIMIT 1',
+            [applicationId]
+        );
+        if (rows.length === 0) {
+            return res.json(null); // No result yet
+        }
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error fetching match result:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 

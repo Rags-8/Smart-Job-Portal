@@ -3,6 +3,7 @@ const router = express.Router();
 const { verifyAuth, verifyAdmin } = require('./auth');
 const db = require('../db');
 const { sendEmail } = require('../utils/emailService');
+const { evaluateApplication } = require('../utils/screeningService');
 
 // POST /api/applications/:jobId -> User only
 router.post('/:jobId', verifyAuth, async (req, res) => {
@@ -33,6 +34,23 @@ router.post('/:jobId', verifyAuth, async (req, res) => {
             RETURNING *
         `, [req.user.id, jobId, full_name, email, phone_number, skills, experience, resume_url, github_url || '', linkedin_url || '']);
 
+    // Send the immediate confirmation email (asynchronously, don't block response)
+    const emailSubject = `Application Received: ${job.title} at ${job.company_name}`;
+    const emailHtml = `
+      <h2>Application Confirmed</h2>
+      <p>Dear ${full_name},</p>
+      <p>This email is to confirm that we have successfully received your application for the <strong>${job.title}</strong> position at <strong>${job.company_name}</strong>.</p>
+      <p>Our team (and our automated AI screening system) will review your profile shortly. You will receive an update regarding your application status within 24 hours.</p>
+      <br/>
+      <p>Thank you,</p>
+      <p>The ${job.company_name} Hiring Team</p>
+    `;
+
+    sendEmail(email, emailSubject, emailHtml).catch(err => console.error("Failed to send confirm email:", err));
+
+    // Trigger AI Screening (Asynchronous)
+    evaluateApplication(rows[0].id, jobId).catch(err => console.error("AI Screening trigger failed:", err));
+    
     res.status(201).json(rows[0]);
   } catch (error) {
     console.error('Error applying to job:', error);
