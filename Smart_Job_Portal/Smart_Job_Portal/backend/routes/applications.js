@@ -14,9 +14,10 @@ router.post('/:jobId', verifyAuth, async (req, res) => {
 
     const jobId = req.params.jobId;
 
-    // Check if job exists
-    const { rows: jobs } = await db.query('SELECT id FROM jobs WHERE id = $1', [jobId]);
+    // Check if job exists and get details for email
+    const { rows: jobs } = await db.query('SELECT id, title, company_name FROM jobs WHERE id = $1', [jobId]);
     if (jobs.length === 0) return res.status(404).json({ error: 'Job not found' });
+    const job = jobs[0];
 
     // Check if already applied
     const { rows: existing } = await db.query('SELECT id FROM applications WHERE user_id = $1 AND job_id = $2', [req.user.id, jobId]);
@@ -50,7 +51,7 @@ router.post('/:jobId', verifyAuth, async (req, res) => {
 
     // Trigger AI Screening (Asynchronous)
     evaluateApplication(rows[0].id, jobId).catch(err => console.error("AI Screening trigger failed:", err));
-    
+
     res.status(201).json(rows[0]);
   } catch (error) {
     console.error('Error applying to job:', error);

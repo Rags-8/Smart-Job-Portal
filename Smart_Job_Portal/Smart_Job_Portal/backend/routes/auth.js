@@ -113,6 +113,51 @@ const verifyAdmin = (req, res, next) => {
     }
 };
 
+// GET /api/auth/me → fetch full profile
+router.get('/me', verifyAuth, async (req, res) => {
+    try {
+        const { rows } = await db.query(
+            'SELECT id, name, email, role, profile_data FROM users WHERE id = $1',
+            [req.user.id]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        const u = rows[0];
+        res.json({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            phone: u.profile_data?.phone || '',
+            github_url: u.profile_data?.github_url || '',
+            linkedin_url: u.profile_data?.linkedin_url || '',
+        });
+    } catch (err) {
+        console.error('Get profile error:', err);
+        res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+});
+
+// PUT /api/auth/me → update profile
+router.put('/me', verifyAuth, async (req, res) => {
+    try {
+        const { name, phone, github_url, linkedin_url } = req.body;
+        const profileData = { phone: phone || '', github_url: github_url || '', linkedin_url: linkedin_url || '' };
+
+        await db.query(
+            'UPDATE users SET name = $1, profile_data = $2 WHERE id = $3',
+            [name || req.user.name, profileData, req.user.id]
+        );
+        res.json({ message: 'Profile updated successfully' });
+    } catch (err) {
+        console.error('Update profile error:', err);
+        // If profile_data column doesn't exist, handle gracefully
+        if (err.code === '42703') {
+            return res.status(500).json({ error: 'profile_data column missing. Run: ALTER TABLE users ADD COLUMN profile_data JSONB DEFAULT \'{}\';' });
+        }
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+
 module.exports = router;
 module.exports.verifyAuth = verifyAuth;
 module.exports.verifyAdmin = verifyAdmin;

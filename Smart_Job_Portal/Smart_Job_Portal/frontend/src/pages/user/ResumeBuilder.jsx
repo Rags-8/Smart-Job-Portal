@@ -37,9 +37,17 @@ const ResumeBuilder = () => {
     useEffect(() => {
         fetchHistory();
         const fetchExisting = async () => {
+            if (!id) {
+                // If the user navigates to /resume-builder (without ID), clear form
+                setResumeData(EMPTY_RESUME);
+                setHasGenerated(false);
+                setActiveTab('ai');
+                setAiPrompt('');
+                setCurrentStep(0);
+                return;
+            }
             try {
-                const endpoint = id ? `/resumes/${id}` : '/resumes/my';
-                const res = await api.get(endpoint);
+                const res = await api.get(`/resumes/${id}`);
                 if (res.data) {
                     setResumeData(res.data);
                     setHasGenerated(true);
@@ -100,7 +108,7 @@ const ResumeBuilder = () => {
             setResumeData(updatedResume);
             setHasGenerated(true);
             setAiPrompt('');
-            setActiveTab('edit');
+            // setActiveTab('edit'); // Removed so the user stays on the AI tab if they generated from it.
             toast.success('Resume updated! Click "Save Resume" to keep this version.');
         } catch (error) {
             console.error('[ResumeBuilder] Error:', error);
@@ -277,12 +285,12 @@ const ResumeBuilder = () => {
                                     {isSaving ? 'Saving...' : 'Save Resume'}
                                 </button>
                                 <button
-                                    onClick={handleDownload}
-                                    disabled={isDownloading}
-                                    className="px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-xl hover:bg-black transition-all flex items-center gap-2 shadow-md disabled:opacity-60"
+                                    onClick={() => window.print()}
+                                    className="px-4 py-2 text-sm font-semibold text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-all flex items-center gap-2 shadow-md"
+                                    title="Saves as a text-searchable PDF"
                                 >
-                                    <Download className={`w-4 h-4 ${isDownloading ? 'rotate-180 transition-transform' : ''}`} />
-                                    {isDownloading ? 'Exporting...' : 'Download PDF'}
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    Print / Download PDF
                                 </button>
                             </>
                         )}

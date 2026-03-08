@@ -3,12 +3,15 @@ import { FileText, Zap, Shield, Search, LayoutDashboard, CheckCircle, Users, Bri
 
 export function Home() {
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-violet-100 selection:text-violet-900">
+        <div className="min-h-screen bg-slate-50 font-sans selection:bg-violet-100 selection:text-violet-900">
             {/* --- HERO SECTION --- */}
             <section className="relative pt-20 pb-32 overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full z-0">
-                    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-200/30 rounded-full blur-[120px]"></div>
-                    <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-blue-200/20 rounded-full blur-[100px]"></div>
+                <div className="absolute inset-0 z-0">
+                    <img src="/hero_bg.png" alt="Job Search AI" className="w-full h-full object-cover opacity-40 mix-blend-multiply" />
+                </div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full z-0 pointer-events-none">
+                    <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] bg-violet-300/40 rounded-full blur-[120px]"></div>
+                    <div className="absolute bottom-[0%] right-[-5%] w-[30%] h-[30%] bg-blue-300/40 rounded-full blur-[100px]"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -68,8 +71,11 @@ export function Home() {
             </section>
 
             {/* --- FEATURES SECTION --- */}
-            <section className="py-32">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="py-32 relative overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <img src="/resume_bg.png" alt="AI Resume Building" className="w-full h-full object-cover opacity-40 mix-blend-multiply" />
+                </div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-20 text-balance px-4 sm:px-0">
                         <h2 className="text-sm font-black text-violet-600 uppercase tracking-[0.3em] mb-4">Core Features</h2>
                         <h2 className="text-4xl font-black text-slate-900 tracking-tight">Everything you need to succeed</h2>
@@ -114,7 +120,10 @@ export function Home() {
 
             {/* --- HOW IT WORKS --- */}
             <section className="py-32 bg-slate-900 text-white overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/20 rounded-full blur-[120px]"></div>
+                <div className="absolute inset-0 z-0">
+                    <img src="/screening_bg.png" alt="AI Screening" className="w-full h-full object-cover opacity-[0.15] mix-blend-lighten" />
+                </div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/30 rounded-full blur-[120px] pointer-events-none"></div>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="flex flex-col lg:flex-row items-center gap-20">

@@ -17,6 +17,23 @@ const Navbar = () => {
         `relative inline-flex items-center px-1 pt-1 text-sm font-bold transition-colors duration-200 ${isActive(path) ? 'text-violet-700' : 'text-gray-700 hover:text-violet-600'
         } group`;
 
+    const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
+    if (isAuthPage) {
+        return (
+            <nav className="sticky top-0 z-50 glass">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-20 items-center">
+                        <Link to="/" className="flex items-center space-x-2">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-violet-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">C</div>
+                            <span className="text-2xl font-bold text-gradient tracking-tight">CareerLens</span>
+                        </Link>
+                    </div>
+                </div>
+            </nav>
+        );
+    }
+
     return (
         <nav className="sticky top-0 z-50 glass">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -54,6 +71,10 @@ const Navbar = () => {
                                             Find Jobs
                                             {isActive('/jobs') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
                                         </Link>
+                                        <Link to="/internships" className={linkClass('/internships')}>
+                                            Find Internships
+                                            {isActive('/internships') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
+                                        </Link>
                                         <Link to="/my-applications" className={linkClass('/my-applications')}>
                                             Applications
                                             {isActive('/my-applications') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
@@ -74,14 +95,19 @@ const Navbar = () => {
                     <div className="flex items-center">
                         {user ? (
                             <div className="flex items-center space-x-6">
-                                <div className="flex flex-col text-right">
-                                    <span className="text-sm font-bold text-gray-900">{user.name}</span>
-                                    <span className="text-xs text-violet-700 font-extrabold uppercase tracking-wider">{user.role}</span>
-                                </div>
+                                <Link to={user.role === 'admin' ? '/admin/dashboard' : '/my-profile'} className="flex items-center space-x-3 group cursor-pointer hover:bg-slate-50 px-3 py-1.5 rounded-xl transition-all">
+                                    <div className="w-9 h-9 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-black text-sm group-hover:bg-violet-600 group-hover:text-white transition-colors">
+                                        {user.name ? user.name[0].toUpperCase() : user.role[0].toUpperCase()}
+                                    </div>
+                                    <div className="flex flex-col text-left">
+                                        <span className="text-sm font-bold text-gray-900 leading-tight">{user.name || 'Profile'}</span>
+                                        <span className="text-[10px] text-violet-600 font-black uppercase tracking-widest">{user.role}</span>
+                                    </div>
+                                </Link>
                                 <div className="h-8 w-px bg-gray-200"></div>
                                 <button
                                     onClick={handleLogout}
-                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full text-gray-700 bg-gray-100 hover:bg-gray-200 hover:text-red-600 transition-all duration-200"
+                                    className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold rounded-xl text-gray-700 bg-gray-50 hover:bg-red-50 hover:text-red-600 transition-all duration-200 border border-gray-100 hover:border-red-100"
                                 >
                                     Logout
                                 </button>

@@ -10,18 +10,21 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Decode JWT to get role without an extra roundtrip, or just use localStorage
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                setUser({ id: payload.id, email: payload.email, role: payload.role });
-            } catch (err) {
-                console.error("Invalid token format:", err);
-                localStorage.removeItem('token');
+        const fetchUser = async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const res = await api.get('/auth/me');
+                    setUser(res.data);
+                } catch (err) {
+                    console.error("Invalid or expired token:", err);
+                    localStorage.removeItem('token');
+                    setUser(null);
+                }
             }
-        }
-        setLoading(false);
+            setLoading(false);
+        };
+        fetchUser();
     }, []);
 
     const login = async (email, password) => {

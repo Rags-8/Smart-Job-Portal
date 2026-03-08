@@ -81,10 +81,10 @@ function buildResumeFromPrompt(text) {
     if (yearMatch) gradYear = yearMatch[1];
 
     // Build summary
-    const expPhrase = expYears ? `${expYears}+ years of` : 'extensive';
+    const expPhrase = expYears ? `${expYears}+ years of` : 'proven';
     const allSkills = [...skills.frontend, ...skills.backend, ...skills.database, ...skills.tools];
-    const topSkills = allSkills.slice(0, 5).join(', ') || 'modern technologies';
-    const summary = `Results-driven ${jobTitle} with ${expPhrase} experience in ${topSkills}. Passionate about building scalable, high-performance solutions and exceptional user experiences. Proven track record of delivering projects on time.`;
+    const topSkills = allSkills.slice(0, 5).join(', ') || 'modern development technologies';
+    const summary = `Dynamic and results-driven ${jobTitle} bringing ${expPhrase} experience in building scalable solutions using ${topSkills}. Committed to delivering high-quality code and optimizing system performance to achieve business objectives. Proven track record of collaborating across teams to ship exceptional products.`;
 
     // Build experience
     const experiences = [];
@@ -327,26 +327,28 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
         let aiPrompt = '';
         if (currentResume) {
             aiPrompt = `
-            ACT AS A RESUME EDITOR.
-            TASK: Update the provided resume JSON based on the user's request.
+            ACT AS AN EXPERT RESUME EDITOR AND ANALYST.
+            TASK: Update the provided resume JSON based on the user's request. Deeply analyze their request and make professional modifications.
             USER REQUEST: "${userPrompt}"
             CURRENT RESUME JSON:
             ${JSON.stringify(currentResume)}
 
             CRITICAL RULES:
             1. ONLY change what is requested or necessitated by the request.
-            2. For all other fields, keep the EXACT data from the CURRENT RESUME JSON.
-            3. Return the COMPLETE, VALIDATED, updated JSON.
-            4. DO NOT include any text, explanations, or markdown wrappers. JUST the JSON object.
+            2. If the user provides a description or asks to update the summary, write a NEW, elevated 2-3 sentence professional summary highlighting their strengths. DO NOT just copy their raw text.
+            3. If the user provides education details, EXACTLY extract and use their provided degree, college, and year. Do not hallucinate incorrect education data.
+            4. For all other fields not mentioned in the request, keep the EXACT data from the CURRENT RESUME JSON.
+            5. Return the COMPLETE, VALIDATED, updated JSON.
+            6. DO NOT include any text, explanations, or markdown wrappers. JUST the JSON object.
             `;
         } else {
             aiPrompt = `
-            ACT AS A RESUME WRITER.
-            TASK: Generate a professional, ATS-friendly resume based on this prompt: "${userPrompt}"
+            ACT AS AN EXPERT RESUME WRITER AND ANALYST.
+            TASK: Deeply analyze the user's description and generate a highly professional, ATS-friendly resume based on this prompt: "${userPrompt}"
             
             RULES:
             1. Return ONLY a valid JSON object.
-            2. Follow this structure exactly:
+            2. Follow this structure exactly (ensure it matches the required types):
                {
                  "personal": { "fullName": "", "jobTitle": "", "email": "", "phone": "", "linkedin": "", "github": "", "portfolio": "", "summary": "" },
                  "skills": { "frontend": [], "backend": [], "database": [], "tools": [] },
@@ -356,8 +358,10 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
                  "certifications": [ { "name": "", "issuer": "" } ],
                  "achievements": [ { "description": "" } ]
                }
-            3. Fill in details creatively based on the professional context of the prompt.
-            4. DO NOT include any text outside the JSON.
+            3. CREATE A REAL PROFESSIONAL SUMMARY: For the "summary" field, write a compelling 2-3 sentence paragraph highlighting the candidate's career objectives, key skills, and strengths based on the prompt. DO NOT just copy and paste the user's text into the summary. Synthesize and elevate it to sound like a top-tier professional.
+            4. EDUCATION ANALYSIS: Strictly analyze the prompt for any mentions of education (e.g., specific degrees, B.Tech, M.S., universities, graduation years). Use EXACTLY what the user provided. Do NOT generate wrong or hallucinated education. If no education is mentioned at all, use a realistic placeholder like "Bachelor of Science in Computer Science", "University Name".
+            5. COMPREHENSIVE DETAILS: Deeply read the user's prompt. Identify their specified skills, project details, and experience. Expand them into professional bullet points using standard ATS keywords. Use creative placeholders only for missing info.
+            6. DO NOT include any text outside the JSON. No markdown formatting.
             `;
         }
 
