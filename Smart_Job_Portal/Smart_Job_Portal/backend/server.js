@@ -43,10 +43,14 @@ app.get('/api/test-email', async (req, res) => {
         "<h2>It works!</h2><p>This is a test email triggered from the CareerLens API logs debugging session.</p>"
     );
 
-    if (success) {
+    if (success === true) {
         res.json({ message: `Test email sent successfully to ${testRecipient}` });
     } else {
-        res.status(500).json({ error: "Failed to send test email. Check Render logs for details." });
+        // If success is an error object (which we will modify sendEmail to return)
+        res.status(500).json({
+            error: "Failed to send test email.",
+            details: success // success will now contain the error object if it fails
+        });
     }
 });
 

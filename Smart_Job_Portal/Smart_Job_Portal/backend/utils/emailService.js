@@ -39,14 +39,15 @@ const sendEmail = async (to, subject, htmlContent) => {
         console.log(`Email sent successfully to ${to} (Message ID: ${info.messageId})`);
         return true;
     } catch (error) {
-        console.error("Critical Error sending email:", {
+        const errorDetails = {
             message: error.message,
             code: error.code,
             command: error.command,
             response: error.response,
             recipient: to
-        });
-        return false;
+        };
+        console.error("Critical Error sending email:", errorDetails);
+        return errorDetails; // Return the error object instead of just false
     }
 };
 
