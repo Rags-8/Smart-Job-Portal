@@ -32,7 +32,9 @@ const sendEmail = async (to, subject, htmlContent) => {
                 html: htmlContent,
             };
 
+            console.time(`[EmailTimer] ${to}`);
             const info = await transporter.sendMail(mailOptions);
+            console.timeEnd(`[EmailTimer] ${to}`);
             console.log(`Email sent successfully via Gmail SMTP to ${to} (ID: ${info.messageId})`);
             return true;
         }

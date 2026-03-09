@@ -47,8 +47,12 @@ router.post('/:jobId', verifyAuth, async (req, res) => {
       <p>The ${job.company_name} Hiring Team</p>
     `;
 
+    const startTime = Date.now();
+    console.log(`[Application] Starting submission for ${email} on job ${jobId}`);
+
     // Send the immediate confirmation email (awaited for reliability)
     try {
+      console.log(`[Email] Attempting to send confirmation to: ${email}`);
       const result = await sendEmail(email, emailSubject, emailHtml);
       if (result === true) {
         console.log(`[Email] Confirmation email sent to ${email} for job: ${job.title}`);
@@ -59,9 +63,11 @@ router.post('/:jobId', verifyAuth, async (req, res) => {
       console.error("[Email] Critical failure in confirmation email flow:", err);
     }
 
-    // Trigger AI Screening (Asynchronous)
+    // Trigger AI Screening (Asynchronous - this can stay background)
     evaluateApplication(rows[0].id, jobId).catch(err => console.error("AI Screening trigger failed:", err));
 
+    const duration = Date.now() - startTime;
+    console.log(`[Application] Submission complete for ${email}. Total time: ${duration}ms`);
     res.status(201).json(rows[0]);
   } catch (error) {
     console.error('Error applying to job:', error);
