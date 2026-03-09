@@ -1,6 +1,4 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config();
-
 const getUser = () => (process.env.SMTP_USER || "").trim();
 const getPass = () => (process.env.SMTP_PASS || "").trim();
 
@@ -17,11 +15,19 @@ const sendEmail = async (to, subject, htmlContent) => {
             return false;
         }
 
-        // Create transporter only when needed to ensure fresh env vars
+        // Use explicit configuration for better reliability in production
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user, pass }
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true, // use SSL
+            auth: { user, pass },
+            debug: true, // show debug output in logs
+            logger: true // log to console
         });
+
+        // Verify connection configuration
+        await transporter.verify();
+        console.log("SMTP Connection verified successfully.");
 
         const info = await transporter.sendMail({
             from: `"Smart Job Portal" <${user}>`,
@@ -37,6 +43,7 @@ const sendEmail = async (to, subject, htmlContent) => {
             message: error.message,
             code: error.code,
             command: error.command,
+            response: error.response,
             recipient: to
         });
         return false;

@@ -25,6 +25,26 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'CareerLens API is running' });
 });
 
+// Test Email Route (Temporary for debugging)
+const { sendEmail } = require('./utils/emailService');
+app.get('/api/test-email', async (req, res) => {
+    const testRecipient = req.query.to || process.env.SMTP_USER;
+    if (!testRecipient) return res.status(400).json({ error: "Missing recipient" });
+
+    console.log(`[TEST] Triggering test email to: ${testRecipient}`);
+    const success = await sendEmail(
+        testRecipient,
+        "Test Email from Smart Job Portal",
+        "<h2>It works!</h2><p>This is a test email triggered from the CareerLens API logs debugging session.</p>"
+    );
+
+    if (success) {
+        res.json({ message: `Test email sent successfully to ${testRecipient}` });
+    } else {
+        res.status(500).json({ error: "Failed to send test email. Check Render logs for details." });
+    }
+});
+
 // Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobsRoutes);
