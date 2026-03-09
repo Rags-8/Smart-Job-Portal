@@ -176,9 +176,37 @@ export function JobDetails() {
     setError(null)
 
     try {
-      const resumeLabel = isSavedResumeSelected
-        ? `Saved Profile: ${getDisplayName()}`
-        : `Uploaded File: ${getDisplayName()}`
+      let resumeContent = ''
+      if (isSavedResumeSelected && selectedSavedResume) {
+        const rData = selectedSavedResume.resume_data || {}
+        const pInfo = getPersonalInfo(rData)
+
+        // Format the JSON resume into a readable string for the database
+        resumeContent = `
+PERSONAL INFORMATION
+Full Name: ${pInfo.fullName || user?.name}
+Job Title: ${pInfo.jobTitle || 'N/A'}
+Email: ${pInfo.email || user?.email}
+Phone: ${pInfo.phone || 'N/A'}
+LinkedIn: ${pInfo.linkedin || 'N/A'}
+GitHub: ${pInfo.github || 'N/A'}
+Summary: ${pInfo.summary || 'N/A'}
+
+SKILLS
+${extractSkills(rData.skills)}
+
+EXPERIENCE
+${(rData.experience || []).map(exp => `- ${exp.title} at ${exp.company} (${exp.duration})\n  ${exp.description}`).join('\n\n')}
+
+PROJECTS
+${(rData.projects || []).map(proj => `- ${proj.title}: ${proj.description}\n  Link: ${proj.link || 'N/A'}`).join('\n\n')}
+
+EDUCATION
+${(rData.education || []).map(edu => `- ${edu.degree} from ${edu.school} (${edu.year})`).join('\n\n')}
+`.trim()
+      } else {
+        resumeContent = `Uploaded File: ${getDisplayName()}`
+      }
 
       const payload = {
         full_name: user?.name || 'Applicant',
@@ -186,7 +214,7 @@ export function JobDetails() {
         phone_number: formData.phone_number,
         skills: formData.skills || 'Not specified',
         experience: job?.experience_required || '0',
-        resume_url: resumeLabel,
+        resume_url: resumeContent,
         github_url: formData.github_url || '',
         linkedin_url: formData.linkedin_url || '',
       }

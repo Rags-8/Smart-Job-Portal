@@ -119,12 +119,12 @@ const Applicants = () => {
                                                             {applicant.github_url && (
                                                                 <div className="flex items-center">
                                                                     <svg className="w-4 h-4 mr-1.5 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .5C5.648.5.5 5.648.5 12c0 5.092 3.292 9.416 7.873 10.942.576.106.787-.25.787-.556 0-.275-.01-1.006-.015-1.976-3.203.697-3.878-1.544-3.878-1.544-.522-1.326-1.275-1.679-1.275-1.679-1.042-.713.08-.699.08-.699 1.152.081 1.757 1.185 1.757 1.185 1.024 1.753 2.687 1.247 3.342.953.104-.742.402-1.247.731-1.533-2.556-.291-5.244-1.278-5.244-5.686 0-1.256.45-2.281 1.185-3.086-.119-.292-.515-1.466.113-3.055 0 0 .967-.31 3.168 1.178a11.04 11.04 0 012.885-.388c.98.004 1.966.132 2.885.388 2.2-1.488 3.167-1.178 3.167-1.178.63 1.589.234 2.763.115 3.055.738.805 1.184 1.83 1.184 3.086 0 4.42-2.692 5.392-5.256 5.676.412.356.78 1.055.78 2.126 0 1.533-.014 2.768-.014 3.144 0 .309.208.667.792.553C20.712 21.414 24 17.092 24 12c0-6.352-5.148-11.5-11.5-11.5z" /></svg>
-<a href={applicant.github_url} target="_blank" rel="noopener noreferrer" className="hover:text-violet-600 transition-colors">GitHub</a>
+                                                                    <a href={applicant.github_url} target="_blank" rel="noopener noreferrer" className="hover:text-violet-600 transition-colors">GitHub</a>
                                                                 </div>)}
                                                             {applicant.linkedin_url && (
                                                                 <div className="flex items-center">
                                                                     <svg className="w-4 h-4 mr-1.5 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zm.02 4.5H0v16h5V8h-.0zM9 8v16h5v-8.5c0-4.5 5-4.85 5 0V24h5V14c0-9.41-10-9.07-10 0V8h-5z" /></svg>
-<a href={applicant.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-violet-600 transition-colors">LinkedIn</a>
+                                                                    <a href={applicant.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-violet-600 transition-colors">LinkedIn</a>
                                                                 </div>)}
                                                             <div className="flex items-center">
                                                                 <svg className="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
@@ -159,10 +159,10 @@ const Applicants = () => {
                                                             ) : (
                                                                 <button
                                                                     onClick={() => setViewingResume({ name: applicant.full_name || applicant.applicant_name, text: applicant.resume_url })}
-                                                                    className="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                                                                    className="inline-flex items-center text-sm font-extrabold text-violet-600 hover:text-violet-800 transition-colors bg-violet-50 px-4 py-2 rounded-xl border border-violet-100 shadow-sm hover:shadow-md active:scale-95"
                                                                 >
-                                                                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                                                    View Applicant Resume
+                                                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                                    View Full Resume
                                                                 </button>
                                                             )}
                                                         </div>
