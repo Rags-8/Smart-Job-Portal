@@ -25,7 +25,7 @@ export function Home() {
                         </div>
 
                         <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight leading-[1.1] mb-8 animate-slide-up">
-                            Land Your Dream Job with <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">CareerLens AI</span>
+                            Land Your Dream Job with <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">Smart Job Portal</span>
                         </h1>
 
                         <p className="text-xl text-slate-600 font-medium leading-relaxed mb-12 animate-slide-up delay-100">
@@ -195,8 +195,8 @@ export function Home() {
             <footer className="py-20 border-t border-slate-100 text-center">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-center space-x-2 mb-8">
-                        <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">C</div>
-                        <span className="text-2xl font-bold text-slate-900 tracking-tight">CareerLens AI</span>
+                        <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">S</div>
+                        <span className="text-2xl font-bold text-slate-900 tracking-tight">Smart Job Portal</span>
                     </div>
                     <p className="text-slate-400 font-bold text-sm uppercase tracking-widest mb-4">Your Intelligent Career Partner</p>
                     <div className="flex justify-center gap-6 text-slate-500 font-bold text-sm">
@@ -205,7 +205,7 @@ export function Home() {
                         <a href="#" className="hover:text-violet-600">Terms</a>
                         <a href="#" className="hover:text-violet-600">Privacy</a>
                     </div>
-                    <p className="mt-12 text-slate-300 text-xs font-medium">© 2026 CareerLens AI. All rights reserved.</p>
+                    <p className="mt-12 text-slate-300 text-xs font-medium">© 2026 Smart Job Portal. All rights reserved.</p>
                 </div>
             </footer>
         </div>

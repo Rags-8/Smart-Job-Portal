@@ -11,7 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 async function analyzeWithGemini(prompt) {
     if (!process.env.GEMINI_API_KEY) return 'ERROR: AI Integration Unavailable. Please add GEMINI_API_KEY.';
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await model.generateContent(prompt);
         const response = await result.response;
         return response.text();
@@ -23,44 +23,63 @@ async function analyzeWithGemini(prompt) {
     }
 }
 
+async function analyzeImageWithGemini(prompt, base64Image) {
+    if (!process.env.GEMINI_API_KEY) return 'ERROR: AI Integration Unavailable.';
+    try {
+        // Remove data:image/png;base64, prefix if present
+        const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        
+        const imagePart = {
+            inlineData: {
+                data: cleanBase64,
+                mimeType: "image/jpeg" // Generic fallback, Gemini handles it well
+            }
+        };
+
+        const result = await model.generateContent([prompt, imagePart]);
+        const response = await result.response;
+        return response.text();
+    } catch (error) {
+        console.error('GEMINI VISION ERROR:', error);
+        return 'ERROR: ' + error.message;
+    }
+}
+
 // ─── Helper: Smart local resume builder (no AI needed) ──────────────────────
 function buildResumeFromPrompt(text, userProfile = {}) {
     const lower = text.toLowerCase();
 
-    // Extract name
+    // 1. Personal Details
     let fullName = userProfile.name || 'Your Name';
     const nameMatch = text.match(/(?:I(?:'m| am)|My name is)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)+)/i);
     if (nameMatch) fullName = nameMatch[1];
 
-    // Extract job title
     const titleKeywords = [
         'software engineer', 'frontend developer', 'backend developer', 'full stack developer',
-        'full-stack developer', 'web developer', 'data scientist', 'data analyst', 'devops engineer',
-        'product manager', 'ui/ux designer', 'mobile developer', 'android developer', 'ios developer',
-        'machine learning engineer', 'cloud engineer', 'java developer', 'python developer',
-        'react developer', 'node.js developer', 'qa engineer', 'tech lead', 'senior developer', 'junior developer'
+        'web developer', 'data scientist', 'data analyst', 'devops engineer',
+        'product manager', 'ui/ux designer', 'mobile developer', 'java developer', 'python developer',
+        'react developer', 'node.js developer', 'qa engineer', 'tech lead'
     ];
-    let jobTitle = 'Software Engineer';
+    let jobTitle = 'Professional';
     for (const kw of titleKeywords) {
         if (lower.includes(kw)) { jobTitle = kw.replace(/\b\w/g, c => c.toUpperCase()); break; }
     }
 
-    // Extract contacts
     const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
     const phoneMatch = text.match(/(?:\+?\d{1,3}[- ]?)?\(?\d{3,4}\)?[- ]?\d{3,4}[- ]?\d{4,6}/);
     const linkedinMatch = text.match(/linkedin\.com\/in\/[a-zA-Z0-9_-]+/i);
     const githubMatch = text.match(/github\.com\/[a-zA-Z0-9_-]+/i);
 
-    // Extract years of experience
     const expMatch = text.match(/(\d+)\s*(?:\+\s*)?years?\s*(?:of\s+)?(?:experience|exp)/i);
     const expYears = expMatch ? expMatch[1] : '';
 
-    // Extract skills
+    // 2. Skills
     const skillMap = {
-        frontend: ['react', 'vue', 'angular', 'html', 'css', 'javascript', 'typescript', 'next.js', 'svelte', 'tailwind', 'redux', 'jquery', 'bootstrap', 'sass'],
-        backend: ['node.js', 'express', 'django', 'flask', 'spring', 'laravel', 'fastapi', 'graphql', 'rest api', 'java', 'python', 'go', 'php', 'c#', '.net', 'ruby', 'kotlin'],
-        database: ['mysql', 'postgresql', 'mongodb', 'firebase', 'redis', 'sqlite', 'dynamodb', 'supabase', 'oracle', 'cassandra'],
-        tools: ['git', 'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'jenkins', 'ci/cd', 'linux', 'jira', 'figma', 'postman', 'terraform', 'github actions']
+        frontend: ['react', 'html', 'css', 'javascript', 'typescript', 'next.js', 'tailwind', 'redux'],
+        backend: ['node.js', 'express', 'python', 'java', 'go', 'flask', 'django', 'fastapi'],
+        database: ['mysql', 'postgresql', 'mongodb', 'firebase', 'redis', 'sqlite'],
+        tools: ['git', 'docker', 'aws', 'gcp', 'jenkins', 'jira', 'figma']
     };
     const skills = { frontend: [], backend: [], database: [], tools: [] };
     for (const [cat, list] of Object.entries(skillMap)) {
@@ -69,83 +88,86 @@ function buildResumeFromPrompt(text, userProfile = {}) {
         }
     }
 
-    // Extract education
+    // summary construction
+    const allSkills = [...skills.frontend, ...skills.backend, ...skills.database, ...skills.tools];
+    const topSkills = allSkills.slice(0, 4).join(', ') || 'industry standard technologies';
+    const summary = userProfile.professional_profile 
+        ? userProfile.professional_profile 
+        : `Dynamic and results-oriented ${jobTitle} with a passion for building high-quality software solutions. ${expYears ? `With ${expYears}+ years of experience, I have` : 'I have'} developed a strong foundation in ${topSkills}. Proven ability to collaborate in fast-paced environments and deliver impactful results.`;
+
+    // 3. Projects
+    const projects = [
+        {
+            title: `${jobTitle} Portfolio Project`,
+            description: `Developed a comprehensive application using ${topSkills}. Implemented core features including user authentication, real-time data sync, and responsive UI components.`
+        }
+    ];
+
+    // 4. Experience
+    const experiences = [];
+    if (expYears) {
+        experiences.push({
+            company: 'Current/Recent Company',
+            role: jobTitle,
+            duration: `${expYears} Year(s)`,
+            description: `Leading development of key features using ${topSkills}. Optimized performance, improved codebase maintainability, and collaborated with cross-functional teams.`
+        });
+    } else {
+        experiences.push({
+            company: 'Professional Projects / Internships',
+            role: jobTitle,
+            duration: '6 Months',
+            description: `Contributed to various development cycles, focusing on ${topSkills}. Resolved critical bugs, implemented UI enhancements, and improved documentation.`
+        });
+    }
+
+    // 5. Education
     let degree = '';
     let college = '';
     let gradYear = '';
-    const degreeMatch = text.match(/\b(?:B\.?Tech|M\.?Tech|BTech|MTech|B\.?E\.|M\.?E\.|B\.?S\.|M\.?S\.|Bachelor(?:'s)?|Master(?:'s)?|PhD|MBA|BSc|MSc|BCA|MCA|BBA)\b[^,.\n]*/i);
+    const degreeMatch = text.match(/\b(?:B\.?Tech|M\.?Tech|BTech|MTech|B\.?E\.|M\.?E\.|B\.?S\.|M\.?S\.|Bachelor|Master|BCA|MCA)\b[^,.\n]*/i);
     if (degreeMatch) degree = degreeMatch[0].trim();
-
-    // Broaden college match to catch "in GPCET", "college of", etc. Allow dots for "G. Pullaiah"
-    const collegeMatch = text.match(/(?:from|at|in|,)\s+([A-Z][^\n,;]{2,60}(?:University|College|Institute|IIT|NIT|MIT|BITS|GPCET)[^\n,;]*)/i);
+    const collegeMatch = text.match(/(?:from|at|in|,)\s+([A-Z][^\n,;]{2,60}(?:University|College|Institute|IIT|NIT|GPCET)[^\n,;]*)/i);
     if (collegeMatch) college = collegeMatch[1].trim();
-
-    // Look for year or "3rd yr"
-    const yearMatch = text.match(/(20\d{2}|\d(?:st|nd|rd|th)\s*yr|\d(?:st|nd|rd|th)\s*year)/i);
+    const yearMatch = text.match(/(20\d{2}|\d(?:st|nd|rd|th)\s*yr)/i);
     if (yearMatch) gradYear = yearMatch[1];
+    const cgpaMatch = text.match(/(?:cgpa|GPA|Percentage)\s*[:=]?\s*(\d+(?:\.\d+)?)/i) || text.match(/(\d+(?:\.\d+)?)\s*(?:cgpa|GPA|Percentage)/i);
 
-    let educationData = [];
-    if (degree || college || gradYear) {
-        // Provide clear placeholders so the user sees the expected 3-line ATS layout
-        educationData.push({
-            degree: degree || 'Degree Name',
-            college: college || 'College/University Name',
-            year: gradYear || 'Expected Graduation Year'
-        });
+    const education = [{
+        degree: degree || (lower.includes('student') ? 'Pursuing Degree' : 'Degree Name'),
+        college: college || 'University Name',
+        year: gradYear || 'Year',
+        cgpa: cgpaMatch ? (cgpaMatch[1] || cgpaMatch[2] || '') : ''
+    }];
+
+    // 6. Certifications
+    const certifications = [];
+    if (lower.includes('certified') || lower.includes('certification')) {
+        certifications.push({ name: 'Professional Certification', issuer: 'Global Authority' });
     }
 
-    // Build summary
-    const expPhrase = expYears ? `${expYears}+ years of` : 'proven';
-    const allSkills = [...skills.frontend, ...skills.backend, ...skills.database, ...skills.tools];
-    const topSkills = allSkills.slice(0, 5).join(', ') || 'modern development technologies';
-    const summary = `Dynamic and results-driven ${jobTitle} bringing ${expPhrase} experience in building scalable solutions using ${topSkills}. Committed to delivering high-quality code and optimizing system performance to achieve business objectives. Proven track record of collaborating across teams to ship exceptional products.`;
-
-    // Build experience
-    const experiences = [];
-    if (expYears && parseInt(expYears) > 1) {
-        experiences.push({
-            company: 'Tech Company',
-            role: jobTitle,
-            duration: `${Math.max(1, parseInt(expYears) - 1)} Year(s)`,
-            description: `Led design and delivery of software solutions using ${topSkills}. Collaborated cross-functionally, performed code reviews, and mentored junior engineers.`
-        });
-    }
-    experiences.push({
-        company: 'Previous Employer',
-        role: `Junior ${jobTitle}`,
-        duration: '1 Year',
-        description: 'Built and maintained web applications in agile sprints. Resolved bugs, improved performance, and contributed to architecture discussions.'
-    });
+    // 7. Achievements
+    const achievements = [
+        { description: 'Consistently delivered complex features within tight deadlines while maintaining high code quality.' },
+        { description: 'Improved system efficiency by 20% through code optimization and architecture refinement.' }
+    ];
 
     return {
         personal: {
-            fullName,
-            jobTitle,
+            fullName, jobTitle,
             email: emailMatch ? emailMatch[0] : (userProfile.email || 'your.email@example.com'),
             phone: phoneMatch ? phoneMatch[0] : (userProfile.phone || '+91 XXXXX XXXXX'),
             linkedin: linkedinMatch ? linkedinMatch[0] : (userProfile.linkedin_url || 'linkedin.com/in/yourprofile'),
             github: githubMatch ? githubMatch[0] : (userProfile.github_url || 'github.com/yourusername'),
-            portfolio: '',
-            summary
+            profile_photo: userProfile.profile_photo || '',
+            portfolio: '', summary
         },
         skills,
-        projects: [
-            {
-                title: `${jobTitle.split(' ')[0]} Portfolio App`,
-                description: `Full-featured application built with ${allSkills.slice(0, 3).join(', ') || 'modern stack'}. Includes authentication, dashboards, and responsive design.`
-            },
-            {
-                title: 'Open Source Contribution',
-                description: 'Contributed enhancements and bug fixes to open source repositories. Improved test coverage and documentation.'
-            }
-        ],
+        projects,
         experience: experiences,
-        education: educationData,
-        certifications: [],
-        achievements: [
-            { description: 'Delivered key features ahead of schedule, accelerating product release timelines.' },
-            { description: 'Recognized for exceptional technical contributions and cross-team collaboration.' }
-        ]
+        education,
+        certifications,
+        achievements
     };
 }
 
@@ -346,55 +368,29 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
             email: dbUser.email || '',
             phone: profileData.phone || '',
             github_url: profileData.github_url || '',
-            linkedin_url: profileData.linkedin_url || ''
+            linkedin_url: profileData.linkedin_url || '',
+            professional_profile: profileData.professional_profile || '',
+            profile_photo: profileData.profile_photo || ''
         };
 
         let aiPrompt = '';
         if (currentResume) {
             aiPrompt = `
-            ACT AS AN EXPERT RESUME EDITOR AND ANALYST.
-            TASK: Update the provided resume JSON based on the user's request. Deeply analyze their request and make professional modifications.
-            USER REQUEST: "${userPrompt}"
-            CURRENT RESUME JSON:
-            ${JSON.stringify(currentResume)}
-
-            CRITICAL RULES:
-            1. ONLY change what is requested or necessitated by the request.
-            2. If the user provides a description or asks to update the summary, write a NEW, elevated 2-3 sentence professional summary highlighting their strengths. DO NOT just copy their raw text.
-            3. If the user provides education details, EXACTLY extract and use their provided degree, college, and year. Do not hallucinate incorrect education data.
-            4. HIGHLIGHT KEYWORDS: Use Markdown bold (**word**) to highlight important technical skills, tools, and metrics throughout the summary, experience, and projects sections.
-            5. For all other fields not mentioned in the request, keep the EXACT data from the CURRENT RESUME JSON.
-            6. Return the COMPLETE, VALIDATED, updated JSON.
-            7. DO NOT include any text, explanations, or markdown wrappers like \`\`\`json. JUST the JSON object.
+            Expert Resume Editor. Update JSON based on: "${userPrompt}"
+            7 Sections: personal, skills, projects, experience, education (include cgpa field if mentioned), certifications, achievements.
+            Identity: fullName: "${userInfo.name}", email: "${userInfo.email}", phone: "${userInfo.phone}", linkedin: "${userInfo.linkedin_url}", github: "${userInfo.github_url}", profile_photo: "${userInfo.profile_photo}".
+            Biographical Hint: "${userInfo.professional_profile}" (use for summary/experience).
+            Strictly: Use **bold** for technical keywords. Return raw JSON. No markdown wrappers.
+            
+            Current: ${JSON.stringify(currentResume)}
             `;
         } else {
             aiPrompt = `
-            ACT AS AN EXPERT RESUME WRITER AND ANALYST.
-            TASK: Deeply analyze the user's description and generate a highly professional, ATS-friendly resume based on this prompt: "${userPrompt}"
-            
-            RULES:
-            1. Return ONLY a valid JSON object.
-            2. Follow this structure exactly (ensure it matches the required types):
-               {
-                 "personal": { "fullName": "", "jobTitle": "", "email": "", "phone": "", "linkedin": "", "github": "", "portfolio": "", "summary": "" },
-                 "skills": { "frontend": [], "backend": [], "database": [], "tools": [] },
-                 "projects": [ { "title": "", "description": "" } ],
-                 "experience": [ { "company": "", "role": "", "duration": "", "description": "" } ],
-                 "education": [ { "degree": "", "college": "", "year": "" } ],
-                 "certifications": [ { "name": "", "issuer": "" } ],
-                 "achievements": [ { "description": "" } ]
-               }
-            3. CREATE A REAL PROFESSIONAL SUMMARY: For the "summary" field, write a compelling 2-3 sentence paragraph highlighting the candidate's career objectives, key skills, and strengths based on the prompt. DO NOT just copy and paste the user's text into the summary. Synthesize and elevate it to sound like a top-tier professional.
-            4. EDUCATION ANALYSIS: If the user explicitly mentions degrees, universities, or graduation years, use them EXACTLY as provided. DO NOT guess or make up incorrect education data. If NO education is mentioned in the prompt, you MUST set the "education" array to an empty array [].
-            5. PROFILE DEFAULTS (CRITICAL): For the "personal" section, you MUST default to using the following details (unless the user explicitly provides different contact details in their prompt):
-               fullName: "${userInfo.name}"
-               email: "${userInfo.email}"
-               phone: "${userInfo.phone}"
-               linkedin: "${userInfo.linkedin_url}"
-               github: "${userInfo.github_url}"
-            6. COMPREHENSIVE DETAILS: Deeply read the user's prompt. Identify their specified skills, project details, and experience. Expand them into professional bullet points using standard ATS keywords. Use creative placeholders only for missing info.
-            7. HIGHLIGHT KEYWORDS: Use Markdown bold (**word**) to highlight important technical skills, frameworks, tools, and metrics throughout the summary, experience descriptions, and project descriptions.
-            8. DO NOT include any text outside the JSON. No markdown formatting outside of the JSON values (e.g. no \`\`\`json wrappers).
+            Expert Resume Architect. Generate ATS JSON from: "${userPrompt}"
+            Use Sections: personal, skills, projects, experience, education (include cgpa field), certifications, achievements.
+            Identity: fullName: "${userInfo.name}", email: "${userInfo.email}", phone: "${userInfo.phone}", linkedin: "${userInfo.linkedin_url}", github: "${userInfo.github_url}", profile_photo: "${userInfo.profile_photo}"
+            Biographical Hint: "${userInfo.professional_profile}" (use to craft original summary/experience).
+            Rules: **bold** tech keywords. Professional summary (3 sentences). Return raw JSON.
             `;
         }
 
@@ -474,6 +470,46 @@ router.get('/match-result/:applicationId', verifyAuth, async (req, res) => {
     } catch (error) {
         console.error('Error fetching match result:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// 6. Verify professional photo
+router.post('/verify-photo', verifyAuth, async (req, res) => {
+    try {
+        const { image } = req.body;
+        if (!image) return res.status(400).json({ error: 'Image required' });
+
+        const prompt = `
+            Act as a strict professional recruiter. Analyze this image for a career platform profile.
+            Is this a high-quality professional headshot or a formal portrait of a single person?
+            
+            STRICT CRITERIA FOR NO:
+            - Casual selfies, gym photos, beach photos, or party pictures.
+            - Images with multiple people, pets, or distracting backgrounds.
+            - Memes, cartoons, landscapes, or low-resolution/blurry shots.
+            - Full-body shots where the face is too small.
+            - Inappropriate attire (e.g., swimwear, sleepwear).
+            
+            STRICT CRITERIA FOR YES:
+            - A clear, well-lit headshot or torso-up portrait of ONE person.
+            - Professional or neutral background.
+            - Professional attire or tidy casual wear suitable for an office environment.
+            
+            If it's just a regular 'normal' casual photo, reply: NO.
+            Only if it looks like a professional profile picture, reply: YES.
+            Reply with EXACTLY one word: YES or NO.
+        `;
+
+        const result = await analyzeImageWithGemini(prompt, image);
+        const sanitized = (result || '').trim().toUpperCase();
+        
+        // Strict mapping: Only a clear YES with no NO anywhere in the string counts
+        const isProfessional = sanitized.includes('YES') && !sanitized.includes('NO');
+
+        res.json({ isProfessional });
+    } catch (error) {
+        console.error('Photo verification crash:', error);
+        res.status(500).json({ error: 'Failed to verify photo' });
     }
 });
 

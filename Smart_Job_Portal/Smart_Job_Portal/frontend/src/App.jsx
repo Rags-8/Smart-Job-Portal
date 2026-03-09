@@ -46,7 +46,6 @@ function App() {
                 <Route path="/admin/edit-job/:id" element={<ProtectedRoute roleRequired="admin"><EditJob /></ProtectedRoute>} />
                 <Route path="/admin/my-jobs" element={<ProtectedRoute roleRequired="admin"><MyJobs /></ProtectedRoute>} />
                 <Route path="/admin/job/:jobId/applicants" element={<ProtectedRoute roleRequired="admin"><Applicants /></ProtectedRoute>} />
-                <Route path="/admin/candidates" element={<ProtectedRoute roleRequired="admin"><Navigate to="/admin/my-jobs" replace /></ProtectedRoute>} />
                 <Route path="/admin/screening" element={<ProtectedRoute roleRequired="admin"><ScreeningDashboard /></ProtectedRoute>} />
 
                 {/* User / Public Routes */}

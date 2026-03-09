@@ -1,9 +1,43 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, Wand2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Plus, Trash2, Wand2, Camera } from 'lucide-react';
+import api from '../../api/axios';
+import { toast } from 'react-hot-toast';
 
 const ResumeForms = ({ currentStep, setCurrentStep, resumeData, updateData }) => {
     const handlePersonalChange = (e) => {
         updateData('personal', { ...resumeData.personal, [e.target.name]: e.target.value });
+    };
+
+    const fileInputRef = useRef(null);
+
+    const validateProfessionalPhoto = async (base64Image) => {
+        const checkToast = toast.loading('Checking photo quality...', { position: 'bottom-center' });
+        try {
+            const res = await api.post('/ai/verify-photo', { image: base64Image });
+            toast.dismiss(checkToast);
+            if (!res.data.isProfessional) {
+                toast.error('please upload professional photo..', { duration: 5000 });
+                return false;
+            }
+            return true;
+        } catch (err) {
+            toast.dismiss(checkToast);
+            return true; 
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const base64String = reader.result;
+            const isOk = await validateProfessionalPhoto(base64String);
+            if (!isOk) return;
+            updateData('personal', { ...resumeData.personal, profile_photo: base64String });
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleAISuggestion = (section) => {
@@ -88,6 +122,38 @@ const ResumeForms = ({ currentStep, setCurrentStep, resumeData, updateData }) =>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">GitHub URL (Optional)</label>
                     <input type="url" name="github" value={resumeData.personal.github} onChange={handlePersonalChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-medium text-gray-900" placeholder="https://github.com/..." />
                 </div>
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Profile Photo</label>
+                    <div className="flex items-center gap-4">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
+                        <div 
+                            className="w-16 h-16 rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-violet-300 transition-colors"
+                            onClick={() => fileInputRef.current.click()}
+                        >
+                            {resumeData.personal.profile_photo ? (
+                                <img src={resumeData.personal.profile_photo} alt="Preview" className="w-full h-full object-cover" />
+                            ) : (
+                                <Camera className="w-6 h-6 text-gray-300" />
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <input 
+                                type="text" 
+                                name="profile_photo" 
+                                value={resumeData.personal.profile_photo || ''} 
+                                onChange={handlePersonalChange} 
+                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-medium text-gray-900" 
+                                placeholder="Paste Image URL or click square to upload" 
+                            />
+                        </div>
+                    </div>
+                </div>
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">Portfolio URL (Optional)</label>
                     <input type="url" name="portfolio" value={resumeData.personal.portfolio} onChange={handlePersonalChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-medium text-gray-900" placeholder="https://portfolio.com/..." />
@@ -121,12 +187,16 @@ const ResumeForms = ({ currentStep, setCurrentStep, resumeData, updateData }) =>
                             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">Graduation Year</label>
                             <input type="text" value={edu.year} onChange={(e) => updateArrayItem('education', index, 'year', e.target.value)} className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500" placeholder="e.g. 2024" />
                         </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">CGPA / Percentage</label>
+                            <input type="text" value={edu.cgpa} onChange={(e) => updateArrayItem('education', index, 'cgpa', e.target.value)} className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500" placeholder="e.g. 9.5 or 85%" />
+                        </div>
                     </div>
                 </div>
             ))}
             <button
                 type="button"
-                onClick={() => addArrayItem('education', { degree: '', college: '', year: '' })}
+                onClick={() => addArrayItem('education', { degree: '', college: '', year: '', cgpa: '' })}
                 className="flex items-center justify-center w-full py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 font-semibold hover:border-violet-500 hover:text-violet-600 hover:bg-violet-50/50 transition-all"
             >
                 <Plus className="w-5 h-5 mr-2" /> Add Education

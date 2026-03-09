@@ -30,7 +30,7 @@ const Login = () => {
                     <div className="bg-white rounded-[2rem] p-10 lg:p-14 w-full max-w-md shadow-[0_10px_40px_rgba(0,0,0,0.04)] text-center animate-slide-up">
                         {/* Purple Icon */}
                         <div className="w-16 h-16 bg-[#eee8fe] rounded-3xl flex items-center justify-center text-[#6833ff] text-2xl font-bold mx-auto mb-8 shadow-sm">
-                            C
+                            S
                         </div>
 
                         <h2 className="text-3xl font-extrabold text-[#111827] tracking-tight">Welcome back</h2>
@@ -99,7 +99,7 @@ const Login = () => {
                             Your next career <br /> move <br /> starts here.
                         </h1>
                         <p className="mt-8 text-lg text-slate-300 font-medium leading-relaxed max-w-md">
-                            Join thousands of professionals who have already accelerated their careers with CareerLens.
+                            Join thousands of professionals who have already accelerated their careers with Smart Job Portal.
                         </p>
                     </div>
                 </div>

@@ -8,7 +8,55 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * @param {string} applicationId 
  * @param {string} jobId 
  */
+/**
+ * Extract keywords/skills from a string or array.
+ */
+function extractSkills(text) {
+    if (!text) return [];
+    if (Array.isArray(text)) return text;
+    // Basic comma-separated or space-separated cleanup
+    return text.toLowerCase().split(/[,\n ]+/).map(s => s.trim()).filter(s => s.length > 2);
+}
+
+/**
+ * Fallback scoring logic in case AI fails (leaked key, quota, etc.)
+ */
+function calculateFallbackScore(job, app) {
+    const jobText = (job.requirements + " " + job.description + " " + job.title).toLowerCase();
+    const appSkills = extractSkills(app.skills);
+    
+    let matched = [];
+    let missing = [];
+    
+    appSkills.forEach(skill => {
+        if (jobText.includes(skill.toLowerCase())) {
+            matched.push(skill);
+        } else {
+            missing.push(skill);
+        }
+    });
+
+    const score = appSkills.length > 0 ? Math.round((matched.length / appSkills.length) * 100) : 50;
+    
+    return {
+        match_percentage: score,
+        matched_skills: matched.slice(0, 10),
+        missing_skills: missing.slice(0, 10),
+        fit_level: (score >= 80 ? "Excellent Fit" : score >= 60 ? "Good Fit" : score >= 40 ? "Partial Fit" : "Not a Fit") + " (Fallback)",
+        logic_explanation: "Automated screening based on keyword matching (AI fallback logic used)."
+    };
+}
+
+/**
+ * Automatically evaluates an application using AI and updates its status.
+ * @param {string} applicationId 
+ * @param {string} jobId 
+ */
 async function evaluateApplication(applicationId, jobId) {
+    let parsedData = null;
+    let app = null;
+    let job = null;
+    
     try {
         console.log(`Starting AI screening for Application: ${applicationId}, Job: ${jobId}`);
 
@@ -26,8 +74,8 @@ async function evaluateApplication(applicationId, jobId) {
             return;
         }
 
-        const job = jobRes.rows[0];
-        const app = appRes.rows[0];
+        job = jobRes.rows[0];
+        app = appRes.rows[0];
 
         // 2. Prepare AI Prompt
         const prompt = `
@@ -53,16 +101,25 @@ async function evaluateApplication(applicationId, jobId) {
         `;
 
         // 3. Call Gemini
-        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
-        const result = await model.generateContent(prompt);
-        const aiResponse = await result.response.text();
-
-        let parsedData;
         try {
-            parsedData = JSON.parse(aiResponse.replace(/```json/g, '').replace(/```/g, '').trim());
-        } catch (e) {
-            console.error("AI JSON Parse Error:", e, aiResponse);
-            return;
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const result = await model.generateContent(prompt);
+            const aiResponse = await result.response.text();
+
+            console.log("AI Response Received.");
+            
+            // Extraction logic with regex for robustness
+            const jsonText = aiResponse.match(/\{[\s\S]*\}/);
+            if (jsonText) {
+                parsedData = JSON.parse(jsonText[0]);
+            } else {
+                throw new Error("No JSON found in AI response");
+            }
+        } catch (aiError) {
+            console.error('AI Processing Error (Check API Key/Quota):', aiError.message);
+            // Fallback strategy
+            console.log("Using keyword-based fallback scoring.");
+            parsedData = calculateFallbackScore(job, app);
         }
 
         const score = parsedData.match_percentage || 0;
@@ -92,7 +149,7 @@ async function evaluateApplication(applicationId, jobId) {
         console.log(`AI Screening Complete. Score: ${score}%, Status: ${status}`);
 
     } catch (error) {
-        console.error('Error during automated AI screening:', error);
+        console.error('Critical error during automated AI screening:', error);
     }
 }
 

@@ -32,6 +32,7 @@ export function JobDetails() {
   const [matchScore, setMatchScore] = useState(0)
   const [applying, setApplying] = useState(false)
   const [selectedFileName, setSelectedFileName] = useState(null)
+  const [pendingFile, setPendingFile] = useState(null)
   const selectorRef = useRef(null)
 
   const [formData, setFormData] = useState({
@@ -106,6 +107,7 @@ export function JobDetails() {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
+      setPendingFile(file)
       setSelectedFileName(file.name)
       setSelectedSavedResume(null)
       // Store just the filename as resume_url for the payload; actual file upload handled via form
@@ -155,6 +157,15 @@ export function JobDetails() {
       return parts.slice(2).join(':') || 'Saved Resume'
     }
     return selectedFileName || ''
+  }
+
+  const handlePreview = () => {
+    if (isSavedResumeSelected && selectedSavedResume) {
+      window.open(`/resume-builder/${selectedSavedResume.id}?preview=true`, '_blank')
+    } else if (isLocalFileSelected && pendingFile) {
+      const fileURL = URL.createObjectURL(pendingFile)
+      window.open(fileURL, '_blank')
+    }
   }
 
   const handleApply = async (e) => {
@@ -500,13 +511,17 @@ export function JobDetails() {
                 {isSavedResumeSelected ? (
                   /* Saved resume selected — show card */
                   <div className="flex flex-col items-center gap-3">
-                    <div className="flex items-center gap-3 px-6 py-4 bg-white shadow-xl shadow-slate-200/50 border border-violet-100 rounded-2xl">
-                      <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center text-violet-600">
+                    <div
+                      onClick={handlePreview}
+                      className="flex items-center gap-3 px-6 py-4 bg-white shadow-xl shadow-slate-200/50 border border-violet-100 rounded-2xl cursor-pointer hover:border-violet-500 hover:bg-violet-50/50 group/preview transition-all"
+                      title="Click to Preview Resume"
+                    >
+                      <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center text-violet-600 group-hover/preview:scale-110 transition-transform">
                         <FileText className="w-5 h-5" />
                       </div>
                       <div className="text-left">
-                        <p className="text-sm font-black text-slate-900">{getDisplayName()}</p>
-                        <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-tight">✓ Auto-selected from saved profile</p>
+                        <p className="text-sm font-black text-slate-900 group-hover/preview:text-violet-700 transition-colors">{getDisplayName()}</p>
+                        <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-tight">✓ Auto-selected — Click to verify</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -534,13 +549,17 @@ export function JobDetails() {
                 ) : isLocalFileSelected ? (
                   /* Local file selected */
                   <div className="flex flex-col items-center gap-3">
-                    <div className="flex items-center gap-3 px-6 py-4 bg-white shadow-xl shadow-slate-200/50 border border-blue-100 rounded-2xl">
-                      <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                    <div
+                      onClick={handlePreview}
+                      className="flex items-center gap-3 px-6 py-4 bg-white shadow-xl shadow-slate-200/50 border border-blue-100 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 group/preview transition-all"
+                      title="Click to Preview Uploaded File"
+                    >
+                      <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover/preview:scale-110 transition-transform">
                         <FileText className="w-5 h-5" />
                       </div>
                       <div className="text-left">
-                        <p className="text-sm font-black text-slate-900 max-w-[200px] truncate">{selectedFileName}</p>
-                        <p className="text-[10px] font-bold text-blue-500 uppercase tracking-tight">✓ Local file ready</p>
+                        <p className="text-sm font-black text-slate-900 max-w-[200px] truncate group-hover/preview:text-blue-700 transition-colors">{selectedFileName}</p>
+                        <p className="text-[10px] font-bold text-blue-500 uppercase tracking-tight">✓ Local file — Click to verify</p>
                       </div>
                     </div>
                     <button

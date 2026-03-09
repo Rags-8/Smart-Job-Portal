@@ -130,6 +130,8 @@ router.get('/me', verifyAuth, async (req, res) => {
             phone: u.profile_data?.phone || '',
             github_url: u.profile_data?.github_url || '',
             linkedin_url: u.profile_data?.linkedin_url || '',
+            professional_profile: u.profile_data?.professional_profile || '',
+            profile_photo: u.profile_data?.profile_photo || '',
         });
     } catch (err) {
         console.error('Get profile error:', err);
@@ -140,8 +142,14 @@ router.get('/me', verifyAuth, async (req, res) => {
 // PUT /api/auth/me → update profile
 router.put('/me', verifyAuth, async (req, res) => {
     try {
-        const { name, phone, github_url, linkedin_url } = req.body;
-        const profileData = { phone: phone || '', github_url: github_url || '', linkedin_url: linkedin_url || '' };
+        const { name, phone, github_url, linkedin_url, professional_profile, profile_photo } = req.body;
+        const profileData = { 
+            phone: phone || '', 
+            github_url: github_url || '', 
+            linkedin_url: linkedin_url || '',
+            professional_profile: professional_profile || '',
+            profile_photo: profile_photo || ''
+        };
 
         await db.query(
             'UPDATE users SET name = $1, profile_data = $2 WHERE id = $3',

@@ -43,7 +43,7 @@ const Signup = () => {
                     <div className="bg-white rounded-[2rem] p-10 lg:p-14 w-full max-w-md shadow-[0_10px_40px_rgba(0,0,0,0.04)] text-center animate-slide-up">
                         {/* Purple Icon */}
                         <div className="w-16 h-16 bg-[#eee8fe] rounded-3xl flex items-center justify-center text-[#6833ff] text-2xl font-bold mx-auto mb-8 shadow-sm">
-                            C
+                            S
                         </div>
 
                         <h2 className="text-3xl font-extrabold text-[#111827] tracking-tight">Create an account</h2>

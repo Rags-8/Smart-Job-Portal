@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Loader2, Sparkles, Download, Save, RefreshCw, Edit3, Wand2, History, Trash2, CheckCircle2 } from 'lucide-react';
 import api from '../../api/axios';
 import { toast } from 'react-hot-toast';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import ResumePreview from '../../components/resume/ResumePreview';
 import ResumeForms from '../../components/resume/ResumeForms';
 import ResumeSidebar from '../../components/resume/ResumeSidebar';
@@ -34,14 +34,34 @@ const ResumeBuilder = () => {
     const [resumeHistory, setResumeHistory] = useState([]);
     const [showHistory, setShowHistory] = useState(false);
     const [modal, setModal] = useState({ open: false, type: null, id: null });
+    const location = useLocation();
+    const isPreview = useMemo(() => new URLSearchParams(location.search).get('preview') === 'true', [location.search]);
+    const isModalOpen = modal.open;
 
-    // Fetch existing resume and history
+    // Fetch existing resume, history, and user profile for new resumes
     useEffect(() => {
         fetchHistory();
         const fetchExisting = async () => {
             if (!id) {
-                // If the user navigates to /resume-builder (without ID), clear form
-                setResumeData(EMPTY_RESUME);
+                // For new resumes, pre-fill from user profile
+                try {
+                    const profileRes = await api.get('/auth/me');
+                    const profile = profileRes.data;
+                    setResumeData({
+                        ...EMPTY_RESUME,
+                        personal: {
+                            ...EMPTY_RESUME.personal,
+                            fullName: profile.name || '',
+                            email: profile.email || '',
+                            phone: profile.phone || '',
+                            github: profile.github_url || '',
+                            linkedin: profile.linkedin_url || '',
+                            profile_photo: profile.profile_photo || ''
+                        }
+                    });
+                } catch (err) {
+                    setResumeData(EMPTY_RESUME);
+                }
                 setHasGenerated(false);
                 setActiveTab('ai');
                 setAiPrompt('');
@@ -207,7 +227,7 @@ const ResumeBuilder = () => {
                             Undo
                         </button>
                     </div>
-                ), { duration: 300000, position: 'bottom-center' });
+                ), { duration: 10000, position: 'bottom-center' });
 
             } catch (err) {
                 toast.error('Failed to delete.');
@@ -222,6 +242,44 @@ const ResumeBuilder = () => {
         }
         setModal({ open: false, type: null, id: null });
     };
+
+    if (isPreview) {
+        return (
+            <div className="min-h-screen bg-slate-50/50">
+                {/* Minimal Header */}
+                <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-slate-100 py-4 px-6 no-print">
+                    <div className="max-w-5xl mx-auto flex justify-between items-center">
+                        <div>
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Resume Preview</span>
+                            <h1 className="text-lg font-black text-slate-900 leading-none mt-0.5">
+                                {resumeData.personal.fullName || 'Verification Mode'}
+                            </h1>
+                        </div>
+                        <button
+                            onClick={() => window.close()}
+                            className="px-6 py-2.5 bg-slate-900 text-white text-xs font-black rounded-xl hover:bg-slate-800 transition-all shadow-lg active:scale-95"
+                        >
+                            Close Preview
+                        </button>
+                    </div>
+                </div>
+
+                {/* Resume Content */}
+                <div className="max-w-5xl mx-auto py-8 sm:py-12 px-4 sm:px-8">
+                    {hasGenerated ? (
+                        <div className="bg-white rounded-3xl shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                             <ResumePreview resumeData={resumeData} />
+                        </div>
+                    ) : (
+                        <div className="py-40 text-center">
+                            <Loader2 className="w-12 h-12 animate-spin text-violet-600 mx-auto mb-4" />
+                            <p className="text-slate-500 font-bold">Loading resume details...</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50/50 flex">
@@ -313,12 +371,13 @@ const ResumeBuilder = () => {
                                     {isSaving ? 'Saving...' : 'Save Resume'}
                                 </button>
                                 <button
-                                    onClick={() => window.print()}
-                                    className="px-4 py-2 text-sm font-semibold text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-all flex items-center gap-2 shadow-md"
-                                    title="Saves as a text-searchable PDF"
+                                    onClick={handleDownload}
+                                    disabled={isDownloading}
+                                    className="px-4 py-2 text-sm font-semibold text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-all flex items-center gap-2 shadow-md disabled:opacity-50"
+                                    title="Generates a high-quality PDF"
                                 >
-                                    <Download className="w-4 h-4" />
-                                    Print / Download PDF
+                                    {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                                    {isDownloading ? 'Generating...' : 'Download PDF'}
                                 </button>
                             </>
                         )}

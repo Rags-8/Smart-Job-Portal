@@ -70,7 +70,7 @@ const MyJobs = () => {
                         Undo
                     </button>
                 </div>
-            ), { duration: 300000, position: 'bottom-center' });
+            ), { duration: 10000, position: 'bottom-center' });
 
         } catch (err) {
             toast.error('Failed to delete job');

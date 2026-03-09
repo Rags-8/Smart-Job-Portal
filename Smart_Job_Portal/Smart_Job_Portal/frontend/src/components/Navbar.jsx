@@ -1,11 +1,15 @@
 import { useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { ArrowLeft } from 'lucide-react';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
+
+    const isPreview = new URLSearchParams(location.search).get('preview') === 'true';
+    if (isPreview) return null;
 
     const handleLogout = () => {
         logout();
@@ -24,10 +28,21 @@ const Navbar = () => {
             <nav className="sticky top-0 z-50 glass">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-20 items-center">
-                        <Link to="/" className="flex items-center space-x-2">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-violet-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">C</div>
-                            <span className="text-2xl font-bold text-gradient tracking-tight">CareerLens</span>
-                        </Link>
+                        <div className="flex items-center gap-4">
+                            {location.pathname !== '/' && (
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500 hover:text-violet-600 shadow-sm border border-slate-100 bg-white/50"
+                                    title="Go Back"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                            )}
+                            <Link to="/" className="flex items-center space-x-2">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-violet-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">S</div>
+                                <span className="text-2xl font-bold text-gradient tracking-tight">Smart Job Portal</span>
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -38,11 +53,22 @@ const Navbar = () => {
         <nav className="sticky top-0 z-50 glass">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20">
-                    <div className="flex items-center space-x-12">
-                        <Link to="/" className="flex items-center space-x-2">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-violet-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">C</div>
-                            <span className="text-2xl font-bold text-gradient tracking-tight">CareerLens</span>
-                        </Link>
+                    <div className="flex items-center space-x-8">
+                        <div className="flex items-center gap-4">
+                            {location.pathname !== '/' && (
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500 hover:text-violet-600"
+                                    title="Go Back"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                            )}
+                            <Link to="/" className="flex items-center space-x-2">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-violet-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">S</div>
+                                <span className="text-2xl font-bold text-gradient tracking-tight">Smart Job Portal</span>
+                            </Link>
+                        </div>
 
                         {user && (
                             <div className="hidden md:flex md:space-x-8 h-full items-center">
@@ -55,10 +81,6 @@ const Navbar = () => {
                                         <Link to="/admin/my-jobs" className={linkClass('/admin/my-jobs')}>
                                             Jobs Posted
                                             {isActive('/admin/my-jobs') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
-                                        </Link>
-                                        <Link to="/admin/candidates" className={linkClass('/admin/candidates')}>
-                                            Candidates
-                                            {isActive('/admin/candidates') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
                                         </Link>
                                         <Link to="/admin/screening" className={linkClass('/admin/screening')}>
                                             Screening Results
