@@ -1,55 +1,43 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const getUser = () => (process.env.SMTP_USER || "").trim();
-const getPass = () => (process.env.SMTP_PASS || "").replace(/\s/g, "");
+const getResendKey = () => (process.env.RESEND_API_KEY || "").trim();
 
 /**
- * Sends an email to the specified recipient.
+ * Sends an email using the Resend API.
  */
 const sendEmail = async (to, subject, htmlContent) => {
-    const user = getUser();
-    const pass = getPass();
+    const apiKey = getResendKey();
 
     try {
-        if (!user || !pass) {
-            console.warn("⚠️ SMTP_USER or SMTP_PASS not defined. Skipping email to:", to);
-            return false;
+        if (!apiKey) {
+            console.warn("⚠️ RESEND_API_KEY not defined. Skipping email to:", to);
+            return { error: "Missing RESEND_API_KEY in environment variables." };
         }
 
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false, // Port 587 uses STARTTLS
-            auth: { user, pass },
-            family: 4, // Explicitly force IPv4
-            connectionTimeout: 15000, // 15 seconds
-            greetingTimeout: 15000,
-            debug: true,
-            logger: true
-        });
+        const resend = new Resend(apiKey);
 
-        await transporter.verify();
-        console.log("SMTP Connection verified successfully.");
-
-        const info = await transporter.sendMail({
-            from: `"Smart Job Portal" <${user}>`,
+        const { data, error } = await resend.emails.send({
+            from: 'Smart Job Portal <onboarding@resend.dev>', // Resend default for unverified domains
             to: to,
             subject: subject,
-            html: htmlContent
+            html: htmlContent,
         });
 
-        console.log(`Email sent successfully to ${to} (Message ID: ${info.messageId})`);
+        if (error) {
+            console.error("Resend API Error:", error);
+            return error;
+        }
+
+        console.log(`Email sent successfully via Resend to ${to} (ID: ${data.id})`);
         return true;
     } catch (error) {
         const errorDetails = {
             message: error.message,
-            code: error.code,
-            command: error.command,
-            response: error.response,
+            stack: error.stack,
             recipient: to
         };
-        console.error("Critical Error sending email:", errorDetails);
-        return errorDetails; // Return the error object instead of just false
+        console.error("Critical Error sending email via Resend:", errorDetails);
+        return errorDetails;
     }
 };
 
