@@ -20,6 +20,11 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Root Health Check (to verify backend is alive)
+app.get('/', (req, res) => {
+    res.json({ status: 'online', message: 'CareerLens API is online' });
+});
+
 // Basic health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'CareerLens API is running' });
@@ -51,6 +56,12 @@ app.use('/api/jobs', jobsRoutes);
 app.use('/api/applications', applicationsRoutes);
 app.use('/api/resumes', resumesRoutes);
 app.use('/api/ai', aiRoutes);
+
+// 404 Catch-all (to log what URLs are missing)
+app.use((req, res, next) => {
+    console.log(`[404] Route not found: ${req.method} ${req.url}`);
+    res.status(404).json({ error: `Route not found: ${req.url}` });
+});
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
