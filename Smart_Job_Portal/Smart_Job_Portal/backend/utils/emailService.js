@@ -1,4 +1,12 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+// Force IPv4 as the default for all network operations
+// This is critical for Render/Vercel environments that have broken IPv6 routing
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
+
 const getUser = () => (process.env.SMTP_USER || "").trim();
 const getPass = () => (process.env.SMTP_PASS || "").replace(/\s/g, "");
 
