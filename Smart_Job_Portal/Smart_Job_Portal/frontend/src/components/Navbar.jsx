@@ -71,10 +71,6 @@ const Navbar = () => {
                                             Find Jobs
                                             {isActive('/jobs') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
                                         </Link>
-                                        <Link to="/internships" className={linkClass('/internships')}>
-                                            Find Internships
-                                            {isActive('/internships') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}
-                                        </Link>
                                         <Link to="/my-applications" className={linkClass('/my-applications')}>
                                             Applications
                                             {isActive('/my-applications') && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-violet-600 rounded-t-lg"></span>}

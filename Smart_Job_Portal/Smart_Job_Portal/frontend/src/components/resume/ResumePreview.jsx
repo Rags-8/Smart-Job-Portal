@@ -3,6 +3,17 @@ import React from 'react';
 const ResumePreview = ({ resumeData }) => {
     const { personal, skills, projects, experience, education, certifications, achievements } = resumeData;
 
+    const renderMarkdown = (text) => {
+        if (!text) return null;
+        const parts = text.split(/(\*\*.*?\*\*)/g);
+        return parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={i} className="font-bold text-gray-900">{part.slice(2, -2)}</strong>;
+            }
+            return <span key={i}>{part}</span>;
+        });
+    };
+
     const renderBulletPoints = (text) => {
         if (!text) return null;
         const lines = text.split('\n').filter(line => line.trim() !== '');
@@ -11,12 +22,12 @@ const ResumePreview = ({ resumeData }) => {
                 <ul className="list-disc list-outside ml-4 mt-1 space-y-1 text-gray-800">
                     {lines.map((line, i) => {
                         const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
-                        return cleanLine ? <li key={i}>{cleanLine}</li> : null;
+                        return cleanLine ? <li key={i}>{renderMarkdown(cleanLine)}</li> : null;
                     })}
                 </ul>
             );
         }
-        return <p className="mt-1 text-gray-800">{text}</p>;
+        return <p className="mt-1 text-gray-800">{renderMarkdown(text)}</p>;
     };
 
     const renderSkillCategory = (title, categorySkills) => {
@@ -55,44 +66,62 @@ const ResumePreview = ({ resumeData }) => {
                 <div id="print-area" className="w-full h-full p-10 bg-white print:p-0 aspect-[1/1.414] mx-auto overflow-y-auto custom-scrollbar font-sans text-[11pt] leading-normal text-black">
 
                     {/* 1. HEADER SECTION - Simplified for ATS */}
-                    <header className="mb-8 text-center border-b-2 border-gray-900 pb-6">
-                        <h1 className="text-4xl font-bold text-black uppercase tracking-tight mb-2">
-                            {personal.fullName || 'YOUR NAME'}
-                        </h1>
-                        {personal.jobTitle && (
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 tracking-wide uppercase">
-                                {personal.jobTitle}
-                            </h2>
-                        )}
+                    <header className="mb-6 border-b-2 border-gray-900 pb-3">
+                        <div className="flex items-baseline mb-1">
+                            <h1 className="text-[24pt] font-black text-black tracking-tight mr-3">
+                                {personal.fullName || 'YOUR NAME'}
+                            </h1>
+                            {personal.jobTitle && (
+                                <h2 className="text-[14pt] font-medium text-gray-800 italic">
+                                    {personal.jobTitle}
+                                </h2>
+                            )}
+                        </div>
 
-                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 text-[11pt] text-gray-900 font-medium">
+                        <div className="flex flex-wrap text-[10pt] text-gray-900 font-medium space-x-5">
                             {personal.email && (
-                                <span className="flex items-center">{personal.email}</span>
+                                <span className="flex items-center">✉ {personal.email}</span>
                             )}
                             {personal.phone && (
-                                <span className="flex items-center">{personal.phone}</span>
+                                <span className="flex items-center">✆ {personal.phone}</span>
                             )}
                             {personal.linkedin && (
-                                <span className="flex items-center">{personal.linkedin.replace('https://', '').replace('www.', '')}</span>
+                                <span className="flex items-center">in https://{personal.linkedin.replace('https://', '').replace('www.', '')}</span>
                             )}
                             {personal.github && (
-                                <span className="flex items-center">{personal.github.replace('https://', '').replace('www.', '')}</span>
+                                <span className="flex items-center">⌨ https://{personal.github.replace('https://', '').replace('www.', '')}</span>
                             )}
                         </div>
                     </header>
 
-                    {/* 2. PROFESSIONAL SUMMARY */}
+                    {/* 2. PROFESSIONAL SUMMARY / PROFILE */}
                     {personal.summary && (
-                        <section className="mb-8">
-                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-3 uppercase tracking-wider">Professional Summary</h3>
-                            <p className="text-gray-900 text-[11pt] text-justify leading-relaxed">{personal.summary}</p>
+                        <section className="mb-6">
+                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-2 uppercase tracking-wider">Profile</h3>
+                            <p className="text-gray-900 text-[11pt] text-justify leading-relaxed">{renderMarkdown(personal.summary)}</p>
                         </section>
                     )}
 
-                    {/* 3. TECHNICAL SKILLS */}
+                    {/* 3. EDUCATION (Moved up for ATS standards) */}
+                    {education.length > 0 && (
+                        <section className="mb-6">
+                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-2 uppercase tracking-wider">Education</h3>
+                            <div className="space-y-3">
+                                {education.map((edu, i) => (
+                                    <div key={i} className="mb-2">
+                                        <h4 className="font-bold text-black text-[11.5pt] mb-0.5">{edu.degree || 'Degree'}</h4>
+                                        <div className="text-[11pt] text-gray-900 leading-snug mb-0.5">{edu.college}</div>
+                                        <div className="text-[11pt] text-gray-900 leading-snug">{edu.year}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* 5. TECHNICAL SKILLS */}
                     {hasSkills && (
-                        <section className="mb-8">
-                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-3 uppercase tracking-wider">Technical Skills</h3>
+                        <section className="mb-6">
+                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-2 uppercase tracking-wider">Technical Skills</h3>
                             <div className="text-[11pt] text-gray-900 space-y-1.5">
                                 {renderSkillCategory('Languages / Frontend', skills.frontend)}
                                 {renderSkillCategory('Backend / Frameworks', skills.backend)}
@@ -102,11 +131,11 @@ const ResumePreview = ({ resumeData }) => {
                         </section>
                     )}
 
-                    {/* 4. EXPERIENCE */}
+                    {/* 6. EXPERIENCE */}
                     {experience.length > 0 && (
-                        <section className="mb-8">
-                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-3 uppercase tracking-wider">Professional Experience</h3>
-                            <div className="space-y-6">
+                        <section className="mb-6">
+                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-2 uppercase tracking-wider">Professional Experience</h3>
+                            <div className="space-y-5">
                                 {experience.map((exp, i) => (
                                     <div key={i}>
                                         <div className="flex justify-between items-baseline mb-1">
@@ -123,10 +152,10 @@ const ResumePreview = ({ resumeData }) => {
                         </section>
                     )}
 
-                    {/* 5. PROJECTS */}
+                    {/* 7. PROJECTS */}
                     {projects.length > 0 && (
-                        <section className="mb-8">
-                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-3 uppercase tracking-wider">Key Projects</h3>
+                        <section className="mb-6">
+                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-2 uppercase tracking-wider">Key Projects</h3>
                             <div className="space-y-5">
                                 {projects.map((proj, i) => (
                                     <div key={i}>
@@ -142,23 +171,7 @@ const ResumePreview = ({ resumeData }) => {
                         </section>
                     )}
 
-                    {/* 6. EDUCATION */}
-                    {education.length > 0 && (
-                        <section className="mb-8">
-                            <h3 className="text-[12pt] font-bold text-black border-b border-gray-900 pb-1 mb-3 uppercase tracking-wider">Education</h3>
-                            <div className="space-y-4">
-                                {education.map((edu, i) => (
-                                    <div key={i} className="flex justify-between items-baseline">
-                                        <div>
-                                            <h4 className="font-bold text-black text-[11.5pt]">{edu.degree || 'Degree'}</h4>
-                                            <div className="text-[11pt] text-gray-900 font-medium">{edu.college}</div>
-                                        </div>
-                                        <div className="text-[11pt] font-bold text-gray-900">{edu.year}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
+
 
                     {/* 7. CERTIFICATIONS */}
                     {certifications.length > 0 && (

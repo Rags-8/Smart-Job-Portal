@@ -6,8 +6,10 @@ import {
     User, Mail, Phone, Github, Linkedin, Edit3, Save, X,
     FileText, Plus, Briefcase, ChevronRight, Loader2,
     History, CheckCircle, Clock, XCircle, AlertCircle,
-    Pencil, Trash2, ExternalLink, BookOpen
+    Pencil, Trash2, ExternalLink, BookOpen, Download
 } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
+import { toast } from 'react-hot-toast';
 
 const MyProfile = () => {
     const { user } = useContext(AuthContext);
@@ -28,6 +30,8 @@ const MyProfile = () => {
         github_url: '',
         linkedin_url: '',
     });
+
+    const [modal, setModal] = useState({ open: false, id: null });
 
     useEffect(() => {
         fetchAll();
@@ -77,12 +81,49 @@ const MyProfile = () => {
     };
 
     const handleDeleteResume = async (id) => {
-        if (!window.confirm('Delete this resume version?')) return;
+        setModal({ open: true, id });
+    };
+
+    const confirmDeleteResume = async () => {
+        const id = modal.id;
+        const resumeToRestore = resumes.find(r => r.id === id);
+
         try {
             await api.delete(`/resumes/${id}`);
             setResumes(prev => prev.filter(r => r.id !== id));
+
+            toast((t) => (
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                        </div>
+                        <span className="text-sm font-bold text-slate-900">Resume deleted</span>
+                    </div>
+                    <button
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            try {
+                                const res = await api.post('/resumes', resumeToRestore.resume_data);
+                                if (res.data?.data) {
+                                    setResumes(prev => [res.data.data, ...prev]);
+                                    toast.success('Resume restored!', { icon: '🔄' });
+                                }
+                            } catch (err) {
+                                toast.error('Restore failed');
+                            }
+                        }}
+                        className="px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black rounded-lg hover:bg-slate-800 transition-all active:scale-95 uppercase tracking-wider"
+                    >
+                        Undo
+                    </button>
+                </div>
+            ), { duration: 300000, position: 'bottom-center' });
+
         } catch {
-            alert('Failed to delete resume.');
+            toast.error('Failed to delete resume.');
+        } finally {
+            setModal({ open: false, id: null });
         }
     };
 
@@ -242,9 +283,10 @@ const MyProfile = () => {
                                         <h2 className="text-xl font-black text-slate-900">Personal Information</h2>
                                         <button
                                             onClick={() => setActiveSection('edit')}
-                                            className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-black rounded-xl transition-all"
+                                            className="flex items-center gap-2 p-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl transition-all"
+                                            title="Edit Profile"
                                         >
-                                            <Pencil className="w-3.5 h-3.5" /> Edit
+                                            <Pencil className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
 
@@ -294,7 +336,11 @@ const MyProfile = () => {
                                     ) : (
                                         <div className="space-y-3">
                                             {resumes.slice(0, 3).map((r, idx) => (
-                                                <div key={r.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all">
+                                                <div
+                                                    key={r.id}
+                                                    onClick={() => navigate(`/resume-builder/${r.id}`)}
+                                                    className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all cursor-pointer"
+                                                >
                                                     <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 flex-shrink-0">
                                                         <FileText className="w-5 h-5" />
                                                     </div>
@@ -307,7 +353,22 @@ const MyProfile = () => {
                                                             Saved {new Date(r.updated_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                         </p>
                                                     </div>
-                                                    <button onClick={() => navigate(`/resume-builder/${r.id}`)} className="px-3 py-1.5 bg-white border border-gray-200 text-slate-700 text-[10px] font-black rounded-lg hover:bg-slate-50 transition-all">Edit</button>
+                                                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/resume-builder/${r.id}`); }}
+                                                            className="p-2 bg-white border border-gray-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all"
+                                                            title="Download PDF"
+                                                        >
+                                                            <Download className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/resume-builder/${r.id}`); }}
+                                                            className="p-2 bg-white border border-gray-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-all"
+                                                            title="Edit Resume"
+                                                        >
+                                                            <Pencil className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -496,7 +557,11 @@ const MyProfile = () => {
                                             const name = r.resume_data?.personalInfo?.fullName || r.resume_data?.personal?.name || 'My Resume';
                                             const title = r.resume_data?.personalInfo?.jobTitle || r.resume_data?.personal?.jobTitle || 'Professional';
                                             return (
-                                                <div key={r.id} className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 p-6 rounded-2xl border transition-all ${idx === 0 ? 'border-violet-200 bg-violet-50/50 shadow-sm' : 'border-gray-100 bg-slate-50/60 hover:bg-slate-50'}`}>
+                                                <div
+                                                    key={r.id}
+                                                    onClick={() => navigate(`/resume-builder/${r.id}`)}
+                                                    className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 p-6 rounded-2xl border transition-all cursor-pointer ${idx === 0 ? 'border-violet-200 bg-violet-50/50 shadow-sm' : 'border-gray-100 bg-slate-50/60 hover:bg-slate-50'}`}
+                                                >
                                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${idx === 0 ? 'bg-violet-100 text-violet-600' : 'bg-gray-100 text-gray-500'}`}>
                                                         <FileText className="w-6 h-6" />
                                                     </div>
@@ -509,16 +574,25 @@ const MyProfile = () => {
                                                     </div>
                                                     <div className="flex items-center gap-2 flex-shrink-0">
                                                         <button
-                                                            onClick={() => navigate(`/resume-builder/${r.id}`)}
-                                                            className="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 text-slate-700 text-xs font-black rounded-xl hover:bg-slate-50 hover:border-violet-200 hover:text-violet-600 transition-all"
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/resume-builder/${r.id}`); }}
+                                                            className="p-2.5 bg-white border border-gray-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-violet-200 hover:text-violet-600 transition-all"
+                                                            title="Download PDF"
                                                         >
-                                                            <Edit3 className="w-3.5 h-3.5" /> Edit
+                                                            <Download className="w-4 h-4" />
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDeleteResume(r.id)}
-                                                            className="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 text-red-500 text-xs font-black rounded-xl hover:bg-red-50 hover:border-red-100 transition-all"
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/resume-builder/${r.id}`); }}
+                                                            className="p-2.5 bg-white border border-gray-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-violet-200 hover:text-violet-600 transition-all"
+                                                            title="Edit Resume"
                                                         >
-                                                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                                                            <Pencil className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleDeleteResume(r.id); }}
+                                                            className="p-2.5 bg-white border border-gray-200 text-red-500 rounded-xl hover:bg-red-50 hover:border-red-100 transition-all"
+                                                            title="Delete Resume"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -589,6 +663,15 @@ const MyProfile = () => {
                     </div>
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={modal.open}
+                onClose={() => setModal({ open: false, id: null })}
+                onConfirm={confirmDeleteResume}
+                title="Delete Resume Version"
+                message="Are you sure you want to delete this resume? This action cannot be undone."
+                confirmText="Delete Now"
+                type="danger"
+            />
         </div>
     );
 };

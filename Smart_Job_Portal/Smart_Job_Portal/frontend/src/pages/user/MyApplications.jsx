@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
+import ConfirmModal from '../../components/ConfirmModal';
+import { toast } from 'react-hot-toast';
 
 const MyApplications = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [modal, setModal] = useState({ open: false, id: null });
 
     useEffect(() => {
         fetchApplications();
@@ -19,6 +22,52 @@ const MyApplications = () => {
             setError('Failed to load your applications');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleConfirmWithdraw = async () => {
+        const id = modal.id;
+        const appToRestore = applications.find(a => a.id === id);
+
+        try {
+            await api.delete(`/applications/${id}`);
+            setApplications(applications.filter(a => a.id !== id));
+
+            toast((t) => (
+                <div className="flex items-center gap-4">
+                    <span className="text-sm font-bold text-slate-900">Application withdrawn</span>
+                    <button
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            try {
+                                const payload = {
+                                    full_name: appToRestore.full_name,
+                                    email: appToRestore.email,
+                                    phone_number: appToRestore.phone_number,
+                                    skills: appToRestore.skills,
+                                    experience: appToRestore.experience,
+                                    resume_url: appToRestore.resume_url,
+                                    github_url: appToRestore.github_url,
+                                    linkedin_url: appToRestore.linkedin_url
+                                };
+                                await api.post(`/applications/${appToRestore.job_id}`, payload);
+                                fetchApplications();
+                                toast.success('Application restored!', { icon: '🔄' });
+                            } catch (err) {
+                                toast.error('Restore failed');
+                            }
+                        }}
+                        className="px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black rounded-lg hover:bg-slate-800 transition-all active:scale-95 uppercase tracking-wider"
+                    >
+                        Undo
+                    </button>
+                </div>
+            ), { duration: 300000, position: 'bottom-center' });
+
+        } catch (err) {
+            toast.error('Failed to withdraw application');
+        } finally {
+            setModal({ open: false, id: null });
         }
     };
 
@@ -91,16 +140,7 @@ const MyApplications = () => {
                                             </Link>
                                         )}
                                         <button
-                                            onClick={async () => {
-                                                if (window.confirm('Are you sure you want to withdraw this application?')) {
-                                                    try {
-                                                        await api.delete(`/applications/${app.id}`);
-                                                        setApplications(applications.filter(a => a.id !== app.id));
-                                                    } catch (err) {
-                                                        alert('Failed to withdraw application');
-                                                    }
-                                                }
-                                            }}
+                                            onClick={() => setModal({ open: true, id: app.id })}
                                             className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
                                         >
                                             Withdraw
@@ -126,6 +166,15 @@ const MyApplications = () => {
                     </div>
                 )}
             </div>
+            <ConfirmModal
+                isOpen={modal.open}
+                onClose={() => setModal({ open: false, id: null })}
+                onConfirm={handleConfirmWithdraw}
+                title="Withdraw Application?"
+                message="Are you sure you want to withdraw this application? This action cannot be undone."
+                confirmText="Withdraw"
+                type="danger"
+            />
         </div>
     );
 };
