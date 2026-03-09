@@ -22,7 +22,10 @@ const sendEmail = async (to, subject, htmlContent) => {
                 if (!transporter) {
                     transporter = nodemailer.createTransport({
                         service: 'gmail',
-                        auth: { user: emailUser, pass: emailPass }
+                        auth: { user: emailUser, pass: emailPass },
+                        connectionTimeout: 10000, // 10 seconds
+                        greetingTimeout: 10000,
+                        socketTimeout: 15000
                     });
                 }
                 const mailOptions = {
