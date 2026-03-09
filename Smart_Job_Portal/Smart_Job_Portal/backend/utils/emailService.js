@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const getUser = () => (process.env.SMTP_USER || "").trim();
-const getPass = () => (process.env.SMTP_PASS || "").trim();
+const getPass = () => (process.env.SMTP_PASS || "").replace(/\s/g, "");
 
 /**
  * Sends an email to the specified recipient.
