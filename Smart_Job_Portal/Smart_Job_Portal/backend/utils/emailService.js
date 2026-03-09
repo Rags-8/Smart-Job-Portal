@@ -21,6 +21,7 @@ const sendEmail = async (to, subject, htmlContent) => {
             port: 465,
             secure: true, // use SSL
             auth: { user, pass },
+            family: 4, // FORCE IPv4 to avoid ENETUNREACH on IPv6-only environments like Render/Vercel
             debug: true, // show debug output in logs
             logger: true // log to console
         });
