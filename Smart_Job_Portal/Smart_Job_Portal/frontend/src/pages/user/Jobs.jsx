@@ -27,9 +27,6 @@ const Jobs = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Check if we're on the dedicated internships page
-    const isInternshipsPage = location.pathname === '/internships';
-
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
@@ -92,9 +89,7 @@ const Jobs = () => {
             (job.company_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
             (job.skills_required?.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())));
 
-        const matchesType = isInternshipsPage
-            ? job.job_type === 'Internship'
-            : (filters.jobType.length === 0 || filters.jobType.includes(job.job_type));
+        const matchesType = filters.jobType.length === 0 || filters.jobType.includes(job.job_type);
 
         const matchesExp = filters.experience.length === 0 || filters.experience.includes(job.experience_required);
         const matchesLocation = !filters.location || job.location === filters.location;
@@ -105,17 +100,14 @@ const Jobs = () => {
         const matchesCategory = !filters.category ||
             (job.category && job.category.toLowerCase() === filters.category.toLowerCase());
 
-        const stepValue = isInternshipsPage ? 1000 : 10000;
         const matchesSalary = filters.salary === 0 ||
-            (job.salary && Number(job.salary) >= filters.salary && Number(job.salary) < (filters.salary + stepValue));
+            (job.salary && Number(job.salary) >= filters.salary);
 
         return matchesSearch && matchesType && matchesExp && matchesLocation && matchesSkills && matchesCategory && matchesSalary;
     });
 
-    // Derive max salary for the slider (either 15k for internships, or dynamic max for jobs)
-    const maxSalary = isInternshipsPage
-        ? 15000
-        : Math.max(100000, ...jobs.map(j => Number(j.salary) || 0));
+    // Derive max salary for the slider (minimum 100k, or dynamic max from jobs)
+    const maxSalary = Math.max(100000, ...jobs.map(j => Number(j.salary) || 0));
 
     const isJobExpired = (dateString) => {
         if (!dateString) return false;
@@ -133,14 +125,14 @@ const Jobs = () => {
                         </div>
                         <input
                             type="text"
-                            placeholder={isInternshipsPage ? "Search by Internship Title, Company, or Keywords..." : "Search by Job Title, Company, or Keywords..."}
+                            placeholder="Search by Job Title, Company, or Keywords..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="block w-full pl-11 pr-4 py-3 bg-white/60 backdrop-blur-md border border-gray-200 rounded-xl leading-5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-medium text-gray-900 placeholder-gray-500 shadow-sm hover:bg-white/80"
                         />
                     </div>
                     <div className="flex items-center text-sm font-semibold text-gray-500 whitespace-nowrap">
-                        Showing {filteredJobs.length} {filteredJobs.length === 1 ? (isInternshipsPage ? 'internship' : 'job') : (isInternshipsPage ? 'internships' : 'jobs')}
+                        Showing {filteredJobs.length} {filteredJobs.length === 1 ? 'listing' : 'listings'}
                     </div>
                 </div>
             </div>
@@ -171,8 +163,8 @@ const Jobs = () => {
                             </select>
                         </div>
 
-                        {/* Job Type Filter - Hidden on Internships Page */}
-                        {!isInternshipsPage && availableJobTypes.length > 0 && (
+                        {/* Job Type Filter */}
+                        {availableJobTypes.length > 0 && (
                             <div>
                                 <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Job Type</h3>
                                 <div className="space-y-2">
@@ -217,10 +209,10 @@ const Jobs = () => {
                         <div>
                             <div className="flex items-center justify-between mb-3">
                                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-                                    {isInternshipsPage ? 'Stipend' : 'Salary'}
+                                    Salary / Stipend
                                 </h3>
                                 <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
-                                    {filters.salary === 0 ? 'Any' : `₹${Number(filters.salary).toLocaleString('en-IN')} - ₹${Number(filters.salary + (isInternshipsPage ? 1000 : 10000)).toLocaleString('en-IN')}`}
+                                    {filters.salary === 0 ? 'Any' : `₹${Number(filters.salary).toLocaleString('en-IN')}+`}
                                 </span>
                             </div>
                             <div className="px-1">
@@ -228,14 +220,14 @@ const Jobs = () => {
                                     type="range"
                                     min="0"
                                     max={maxSalary}
-                                    step={isInternshipsPage ? 1000 : 10000}
+                                    step={10000}
                                     value={filters.salary}
                                     onChange={(e) => handleFilterChange('salary', Number(e.target.value))}
                                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                                 />
                                 <div className="flex justify-between text-xs font-medium text-gray-400 mt-2">
                                     <span>₹0</span>
-                                    <span>₹{maxSalary.toLocaleString('en-IN')}{isInternshipsPage ? '' : '+'}</span>
+                                    <span>₹{maxSalary.toLocaleString('en-IN')}+</span>
                                 </div>
                             </div>
                         </div>
@@ -290,7 +282,7 @@ const Jobs = () => {
                             {filteredJobs.length === 0 ? (
                                 <div className="col-span-full text-center p-12 bg-white/60 backdrop-blur-sm border border-gray-200 rounded-3xl border-dashed">
                                     <p className="text-gray-500 font-bold text-lg">
-                                        {filters.category ? `Sorry! No ${isInternshipsPage ? 'internships' : 'jobs'} based on the "${filters.category}" category.` : `Sorry! No ${isInternshipsPage ? 'internships' : 'jobs'} match your filters.`}
+                                        {filters.category ? `Sorry! No listings based on the "${filters.category}" category.` : `Sorry! No listings match your filters.`}
                                     </p>
                                     <button
                                         onClick={() => { setSearchQuery(''); setFilters({ jobType: [], experience: [], location: '', skills: [], category: '', salary: 0 }) }}

@@ -8,6 +8,7 @@ import ResumeForms from '../../components/resume/ResumeForms';
 import ResumeSidebar from '../../components/resume/ResumeSidebar';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import ConfirmModal from '../../components/ConfirmModal';
 
 const EMPTY_RESUME = {
     personal: { fullName: '', jobTitle: '', email: '', phone: '', linkedin: '', github: '', portfolio: '', summary: '' },
@@ -32,6 +33,7 @@ const ResumeBuilder = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [resumeHistory, setResumeHistory] = useState([]);
     const [showHistory, setShowHistory] = useState(false);
+    const [modal, setModal] = useState({ open: false, type: null, id: null });
 
     // Fetch existing resume and history
     useEffect(() => {
@@ -51,7 +53,6 @@ const ResumeBuilder = () => {
                 if (res.data) {
                     setResumeData(res.data);
                     setHasGenerated(true);
-                    setActiveTab('edit');
                 }
             } catch (err) {
                 // Ignore 404
@@ -177,14 +178,49 @@ const ResumeBuilder = () => {
 
     const deleteVersion = async (id, e) => {
         e.stopPropagation();
-        if (!window.confirm('Delete this version?')) return;
-        try {
-            await api.delete(`/resumes/${id}`);
-            toast.success('Version removed');
-            fetchHistory();
-        } catch (err) {
-            toast.error('Failed to delete.');
+        setModal({ open: true, type: 'delete', id });
+    };
+
+    const handleConfirmAction = async () => {
+        if (modal.type === 'delete') {
+            const versionToRestore = resumeHistory.find(v => v.id === modal.id);
+            try {
+                await api.delete(`/resumes/${modal.id}`);
+                fetchHistory();
+
+                toast((t) => (
+                    <div className="flex items-center gap-4">
+                        <span className="text-sm font-bold text-slate-900">Version removed</span>
+                        <button
+                            onClick={async () => {
+                                toast.dismiss(t.id);
+                                try {
+                                    await api.post('/resumes', versionToRestore.resume_data);
+                                    fetchHistory();
+                                    toast.success('Version restored!', { icon: '🔄' });
+                                } catch (err) {
+                                    toast.error('Restore failed');
+                                }
+                            }}
+                            className="px-3 py-1 bg-slate-900 text-white text-[10px] font-black rounded-lg hover:bg-slate-800 transition-all active:scale-95 uppercase tracking-wider"
+                        >
+                            Undo
+                        </button>
+                    </div>
+                ), { duration: 300000, position: 'bottom-center' });
+
+            } catch (err) {
+                toast.error('Failed to delete.');
+            }
+        } else if (modal.type === 'new') {
+            setResumeData(EMPTY_RESUME);
+            setHasGenerated(false);
+            setActiveTab('ai');
+            setAiPrompt('');
+            setCurrentStep(0);
+            navigate('/resume-builder', { replace: true });
         }
+        setModal({ open: false, type: null, id: null });
     };
 
     return (
@@ -261,15 +297,7 @@ const ResumeBuilder = () => {
                     </div>
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => {
-                                if (window.confirm('Are you sure you want to start a new resume? Any unsaved changes will be lost.')) {
-                                    setResumeData(EMPTY_RESUME);
-                                    setHasGenerated(false);
-                                    setActiveTab('ai');
-                                    setAiPrompt('');
-                                    setCurrentStep(0);
-                                }
-                            }}
+                            onClick={() => setModal({ open: true, type: 'new' })}
                             className="px-4 py-2 text-sm font-semibold text-red-600 bg-white border border-red-100 rounded-xl hover:bg-red-50 transition-all shadow-sm"
                         >
                             New Resume
@@ -289,7 +317,7 @@ const ResumeBuilder = () => {
                                     className="px-4 py-2 text-sm font-semibold text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-all flex items-center gap-2 shadow-md"
                                     title="Saves as a text-searchable PDF"
                                 >
-                                    <CheckCircle2 className="w-4 h-4" />
+                                    <Download className="w-4 h-4" />
                                     Print / Download PDF
                                 </button>
                             </>
@@ -388,6 +416,15 @@ const ResumeBuilder = () => {
                     </div>
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={modal.open}
+                onClose={() => setModal({ open: false, type: null, id: null })}
+                onConfirm={handleConfirmAction}
+                title={modal.type === 'delete' ? "Delete version" : "Start New Resume?"}
+                message={modal.type === 'delete' ? "Are you sure you want to delete this version? This action is permanent." : "Any unsaved changes will be lost. Do you want to continue?"}
+                confirmText={modal.type === 'delete' ? "Delete" : "Start New"}
+                type="danger"
+            />
         </div>
     );
 };

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
+import ConfirmModal from '../../components/ConfirmModal';
+import { toast } from 'react-hot-toast';
 
 const MyJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [modal, setModal] = useState({ open: false, id: null });
 
     useEffect(() => {
         fetchMyJobs();
@@ -19,6 +22,60 @@ const MyJobs = () => {
             setError('Failed to load your jobs');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        const id = modal.id;
+        const jobToRestore = jobs.find(j => j.id === id);
+
+        try {
+            await api.delete(`/jobs/${id}`);
+            setJobs(jobs.filter(j => j.id !== id));
+
+            toast((t) => (
+                <div className="flex items-center gap-4">
+                    <span className="text-sm font-bold text-slate-900">Job deleted</span>
+                    <button
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            try {
+                                const payload = {
+                                    title: jobToRestore.title,
+                                    location: jobToRestore.location,
+                                    salary: jobToRestore.salary,
+                                    job_type: jobToRestore.job_type,
+                                    description: jobToRestore.description,
+                                    company_name: jobToRestore.company_name,
+                                    company_website: jobToRestore.company_website,
+                                    company_description: jobToRestore.company_description,
+                                    experience_required: jobToRestore.experience_required,
+                                    skills_required: jobToRestore.skills_required,
+                                    number_of_openings: jobToRestore.number_of_openings,
+                                    application_last_date: jobToRestore.application_last_date,
+                                    responsibilities: jobToRestore.responsibilities,
+                                    requirements: jobToRestore.requirements,
+                                    benefits: jobToRestore.benefits,
+                                    category: jobToRestore.category
+                                };
+                                await api.post('/jobs', payload);
+                                fetchMyJobs();
+                                toast.success('Job listing restored!', { icon: '🔄' });
+                            } catch (err) {
+                                toast.error('Restore failed');
+                            }
+                        }}
+                        className="px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black rounded-lg hover:bg-slate-800 transition-all active:scale-95 uppercase tracking-wider"
+                    >
+                        Undo
+                    </button>
+                </div>
+            ), { duration: 300000, position: 'bottom-center' });
+
+        } catch (err) {
+            toast.error('Failed to delete job');
+        } finally {
+            setModal({ open: false, id: null });
         }
     };
 
@@ -99,16 +156,7 @@ const MyJobs = () => {
                                                 Edit
                                             </Link>
                                             <button
-                                                onClick={async () => {
-                                                    if (window.confirm('Are you sure you want to delete this job?')) {
-                                                        try {
-                                                            await api.delete(`/jobs/${job.id}`);
-                                                            setJobs(jobs.filter(j => j.id !== job.id));
-                                                        } catch (err) {
-                                                            alert('Failed to delete job');
-                                                        }
-                                                    }
-                                                }}
+                                                onClick={() => setModal({ open: true, id: job.id })}
                                                 className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
                                             >
                                                 Delete
@@ -143,6 +191,15 @@ const MyJobs = () => {
                     </div>
                 )}
             </div>
+            <ConfirmModal
+                isOpen={modal.open}
+                onClose={() => setModal({ open: false, id: null })}
+                onConfirm={handleConfirmDelete}
+                title="Delete Job Listing?"
+                message="Are you sure you want to delete this job? All applications for this job will also be removed."
+                confirmText="Delete"
+                type="danger"
+            />
         </div>
     );
 };

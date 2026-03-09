@@ -10,7 +10,7 @@ router.post('/', verifyAuth, verifyAdmin, async (req, res) => {
             title, location, salary, job_type, description,
             company_name, company_website, company_description,
             experience_required, skills_required, number_of_openings,
-            application_last_date, responsibilities, requirements, benefits
+            application_last_date, responsibilities, requirements, benefits, category
         } = req.body;
 
         if (!title || !location || !salary || !job_type || !description ||
@@ -108,7 +108,7 @@ router.put('/:id', verifyAuth, verifyAdmin, async (req, res) => {
             title, location, salary, job_type, description,
             company_name, company_website, company_description,
             experience_required, skills_required, number_of_openings,
-            application_last_date, responsibilities, requirements, benefits
+            application_last_date, responsibilities, requirements, benefits, category
         } = req.body;
 
         if (!title || !location || !salary || !job_type || !description ||

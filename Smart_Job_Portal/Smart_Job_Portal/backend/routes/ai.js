@@ -24,11 +24,11 @@ async function analyzeWithGemini(prompt) {
 }
 
 // ─── Helper: Smart local resume builder (no AI needed) ──────────────────────
-function buildResumeFromPrompt(text) {
+function buildResumeFromPrompt(text, userProfile = {}) {
     const lower = text.toLowerCase();
 
     // Extract name
-    let fullName = 'Your Name';
+    let fullName = userProfile.name || 'Your Name';
     const nameMatch = text.match(/(?:I(?:'m| am)|My name is)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)+)/i);
     if (nameMatch) fullName = nameMatch[1];
 
@@ -70,15 +70,29 @@ function buildResumeFromPrompt(text) {
     }
 
     // Extract education
-    let degree = 'Bachelor of Science in Computer Science';
-    let college = 'University';
-    let gradYear = new Date().getFullYear().toString();
-    const degreeMatch = text.match(/(?:B\.?Tech|B\.?E\.?|B\.?S\.?|M\.?Tech|M\.?S\.?|M\.?E\.?|Bachelor|Master|PhD|MBA)[^,.\n]*/i);
+    let degree = '';
+    let college = '';
+    let gradYear = '';
+    const degreeMatch = text.match(/\b(?:B\.?Tech|M\.?Tech|BTech|MTech|B\.?E\.|M\.?E\.|B\.?S\.|M\.?S\.|Bachelor(?:'s)?|Master(?:'s)?|PhD|MBA|BSc|MSc|BCA|MCA|BBA)\b[^,.\n]*/i);
     if (degreeMatch) degree = degreeMatch[0].trim();
-    const collegeMatch = text.match(/(?:from|at)\s+([A-Z][^\n,;.]{3,60}(?:University|College|Institute|IIT|NIT|MIT|BITS)[^\n,;.]*)/i);
+
+    // Broaden college match to catch "in GPCET", "college of", etc. Allow dots for "G. Pullaiah"
+    const collegeMatch = text.match(/(?:from|at|in|,)\s+([A-Z][^\n,;]{2,60}(?:University|College|Institute|IIT|NIT|MIT|BITS|GPCET)[^\n,;]*)/i);
     if (collegeMatch) college = collegeMatch[1].trim();
-    const yearMatch = text.match(/(20\d{2})/);
+
+    // Look for year or "3rd yr"
+    const yearMatch = text.match(/(20\d{2}|\d(?:st|nd|rd|th)\s*yr|\d(?:st|nd|rd|th)\s*year)/i);
     if (yearMatch) gradYear = yearMatch[1];
+
+    let educationData = [];
+    if (degree || college || gradYear) {
+        // Provide clear placeholders so the user sees the expected 3-line ATS layout
+        educationData.push({
+            degree: degree || 'Degree Name',
+            college: college || 'College/University Name',
+            year: gradYear || 'Expected Graduation Year'
+        });
+    }
 
     // Build summary
     const expPhrase = expYears ? `${expYears}+ years of` : 'proven';
@@ -107,10 +121,10 @@ function buildResumeFromPrompt(text) {
         personal: {
             fullName,
             jobTitle,
-            email: emailMatch ? emailMatch[0] : 'your.email@example.com',
-            phone: phoneMatch ? phoneMatch[0] : '+91 XXXXX XXXXX',
-            linkedin: linkedinMatch ? linkedinMatch[0] : 'linkedin.com/in/yourprofile',
-            github: githubMatch ? githubMatch[0] : 'github.com/yourusername',
+            email: emailMatch ? emailMatch[0] : (userProfile.email || 'your.email@example.com'),
+            phone: phoneMatch ? phoneMatch[0] : (userProfile.phone || '+91 XXXXX XXXXX'),
+            linkedin: linkedinMatch ? linkedinMatch[0] : (userProfile.linkedin_url || 'linkedin.com/in/yourprofile'),
+            github: githubMatch ? githubMatch[0] : (userProfile.github_url || 'github.com/yourusername'),
             portfolio: '',
             summary
         },
@@ -126,7 +140,7 @@ function buildResumeFromPrompt(text) {
             }
         ],
         experience: experiences,
-        education: [{ degree, college, year: gradYear }],
+        education: educationData,
         certifications: [],
         achievements: [
             { description: 'Delivered key features ahead of schedule, accelerating product release timelines.' },
@@ -324,6 +338,17 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
             return res.status(400).json({ error: 'Prompt is required' });
         }
 
+        const { rows } = await db.query('SELECT name, email, profile_data FROM users WHERE id = $1', [req.user.id]);
+        const dbUser = rows[0] || {};
+        const profileData = dbUser.profile_data || {};
+        const userInfo = {
+            name: dbUser.name || '',
+            email: dbUser.email || '',
+            phone: profileData.phone || '',
+            github_url: profileData.github_url || '',
+            linkedin_url: profileData.linkedin_url || ''
+        };
+
         let aiPrompt = '';
         if (currentResume) {
             aiPrompt = `
@@ -337,9 +362,10 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
             1. ONLY change what is requested or necessitated by the request.
             2. If the user provides a description or asks to update the summary, write a NEW, elevated 2-3 sentence professional summary highlighting their strengths. DO NOT just copy their raw text.
             3. If the user provides education details, EXACTLY extract and use their provided degree, college, and year. Do not hallucinate incorrect education data.
-            4. For all other fields not mentioned in the request, keep the EXACT data from the CURRENT RESUME JSON.
-            5. Return the COMPLETE, VALIDATED, updated JSON.
-            6. DO NOT include any text, explanations, or markdown wrappers. JUST the JSON object.
+            4. HIGHLIGHT KEYWORDS: Use Markdown bold (**word**) to highlight important technical skills, tools, and metrics throughout the summary, experience, and projects sections.
+            5. For all other fields not mentioned in the request, keep the EXACT data from the CURRENT RESUME JSON.
+            6. Return the COMPLETE, VALIDATED, updated JSON.
+            7. DO NOT include any text, explanations, or markdown wrappers like \`\`\`json. JUST the JSON object.
             `;
         } else {
             aiPrompt = `
@@ -359,19 +385,40 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
                  "achievements": [ { "description": "" } ]
                }
             3. CREATE A REAL PROFESSIONAL SUMMARY: For the "summary" field, write a compelling 2-3 sentence paragraph highlighting the candidate's career objectives, key skills, and strengths based on the prompt. DO NOT just copy and paste the user's text into the summary. Synthesize and elevate it to sound like a top-tier professional.
-            4. EDUCATION ANALYSIS: Strictly analyze the prompt for any mentions of education (e.g., specific degrees, B.Tech, M.S., universities, graduation years). Use EXACTLY what the user provided. Do NOT generate wrong or hallucinated education. If no education is mentioned at all, use a realistic placeholder like "Bachelor of Science in Computer Science", "University Name".
-            5. COMPREHENSIVE DETAILS: Deeply read the user's prompt. Identify their specified skills, project details, and experience. Expand them into professional bullet points using standard ATS keywords. Use creative placeholders only for missing info.
-            6. DO NOT include any text outside the JSON. No markdown formatting.
+            4. EDUCATION ANALYSIS: If the user explicitly mentions degrees, universities, or graduation years, use them EXACTLY as provided. DO NOT guess or make up incorrect education data. If NO education is mentioned in the prompt, you MUST set the "education" array to an empty array [].
+            5. PROFILE DEFAULTS (CRITICAL): For the "personal" section, you MUST default to using the following details (unless the user explicitly provides different contact details in their prompt):
+               fullName: "${userInfo.name}"
+               email: "${userInfo.email}"
+               phone: "${userInfo.phone}"
+               linkedin: "${userInfo.linkedin_url}"
+               github: "${userInfo.github_url}"
+            6. COMPREHENSIVE DETAILS: Deeply read the user's prompt. Identify their specified skills, project details, and experience. Expand them into professional bullet points using standard ATS keywords. Use creative placeholders only for missing info.
+            7. HIGHLIGHT KEYWORDS: Use Markdown bold (**word**) to highlight important technical skills, frameworks, tools, and metrics throughout the summary, experience descriptions, and project descriptions.
+            8. DO NOT include any text outside the JSON. No markdown formatting outside of the JSON values (e.g. no \`\`\`json wrappers).
             `;
         }
 
         const aiResponse = await analyzeWithGemini(aiPrompt);
 
         // If AI is unavailable or produces an error string
-        if (!aiResponse || aiResponse.startsWith('ERROR:') || aiResponse.includes('rate_limit')) {
+        if (!aiResponse || aiResponse.startsWith('ERROR:') || aiResponse.includes('rate_limit') || aiResponse.toLowerCase().includes('api key')) {
             console.error('[Resume Generation] AI Error or Unavailable:', aiResponse);
-            if (currentResume) return res.json(currentResume);
-            return res.json(buildResumeFromPrompt(userPrompt));
+            if (currentResume) {
+                // Try a very rudimentary fallback update for education if asked
+                const lowerPrompt = userPrompt.toLowerCase();
+                if (lowerPrompt.includes('education') || lowerPrompt.includes('college') || lowerPrompt.includes('btech')) {
+                    const fallbackData = buildResumeFromPrompt(userPrompt, userInfo);
+                    const updated = JSON.parse(JSON.stringify(currentResume));
+                    updated.education = [{
+                        degree: fallbackData.education[0]?.degree || (lowerPrompt.includes('btech') ? 'B.Tech' : 'Degree Name'),
+                        college: fallbackData.education[0]?.college || userPrompt.replace(/update (my )?education/i, '').substring(0, 60).trim() || 'College/University Name',
+                        year: fallbackData.education[0]?.year || 'Expected Graduation Year'
+                    }];
+                    return res.json(updated);
+                }
+                return res.status(503).json({ error: "AI service is currently busy or out of quota. Please use 'Manual Edit' to make specific updates for now." });
+            }
+            return res.json(buildResumeFromPrompt(userPrompt, userInfo));
         }
 
         let parsedData = null;
@@ -388,8 +435,10 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
         } catch (e) {
             console.error('[Resume Generation] Parse Error. Raw Response:', aiResponse);
             console.error('[Resume Generation] Error details:', e.message);
-            if (currentResume) return res.json(currentResume);
-            return res.json(buildResumeFromPrompt(userPrompt));
+            if (currentResume) {
+                return res.status(500).json({ error: "The AI formatted its response incorrectly. Please try again or use 'Manual Edit'." });
+            }
+            return res.json(buildResumeFromPrompt(userPrompt, userInfo));
         }
 
         // Basic validation: ensure expected keys exist
@@ -398,7 +447,10 @@ router.post('/generate-resume-from-prompt', verifyAuth, async (req, res) => {
             return res.json(parsedData);
         } else {
             console.error('[Resume Generation] Invalid JSON shape:', parsedData);
-            return res.json(currentResume || buildResumeFromPrompt(userPrompt));
+            if (currentResume) {
+                return res.status(500).json({ error: "The AI skipped some required fields. Please use 'Manual Edit' to continue." });
+            }
+            return res.json(buildResumeFromPrompt(userPrompt, userInfo));
         }
     } catch (error) {
         console.error('[Resume Generation] Crash Error:', error);

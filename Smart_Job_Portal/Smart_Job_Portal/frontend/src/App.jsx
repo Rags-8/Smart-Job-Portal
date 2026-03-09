@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
@@ -24,6 +25,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <Toaster position="top-center" reverseOrder={false} />
         <div className="min-h-screen relative overflow-hidden bg-[#f8f5ff]">
           {/* Ambient 3D Glow Orbs */}
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-violet-400/20 rounded-full blur-[100px] pointer-events-none mix-blend-multiply" />
@@ -49,7 +51,6 @@ function App() {
 
                 {/* User / Public Routes */}
                 <Route path="/jobs" element={<Jobs />} />
-                <Route path="/internships" element={<Jobs />} />
                 <Route path="/job/:id" element={<JobDetails />} />
                 <Route path="/my-applications" element={<ProtectedRoute roleRequired="user"><MyApplications /></ProtectedRoute>} />
                 <Route path="/my-profile" element={<ProtectedRoute roleRequired="user"><MyProfile /></ProtectedRoute>} />
