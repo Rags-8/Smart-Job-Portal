@@ -17,24 +17,38 @@ const sendEmail = async (to, subject, htmlContent) => {
     const user = getUser();
     const pass = getPass();
 
+    console.log(`Node version: ${process.version}`);
+
     try {
         if (!user || !pass) {
             console.warn("⚠️ SMTP_USER or SMTP_PASS not defined. Skipping email to:", to);
             return false;
         }
 
-        // Use explicit configuration for better reliability in production
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false, // use STARTTLS
-            auth: { user, pass },
-            family: 4, // FORCE IPv4 to avoid ENETUNREACH on IPv6-only environments like Render/Vercel
-            debug: true, // show debug output in logs
-            logger: true // log to console
+        // Manually resolve the hostname to an IPv4 address to bypass broken IPv6
+        const host = 'smtp.gmail.com';
+        const ip = await new Promise((resolve, reject) => {
+            dns.lookup(host, { family: 4 }, (err, address) => {
+                if (err) reject(err);
+                else resolve(address);
+            });
         });
 
-        // Verify connection configuration
+        console.log(`Resolved ${host} to IPv4: ${ip}`);
+
+        const transporter = nodemailer.createTransport({
+            host: ip, // Use the IP directly
+            port: 587,
+            secure: false,
+            auth: { user, pass },
+            tls: {
+                servername: host, // Critical: set servername so certificate matches 'smtp.gmail.com'
+                rejectUnauthorized: false // Skip cert validation if IP is used directly (only for diag/emergency)
+            },
+            debug: true,
+            logger: true
+        });
+
         await transporter.verify();
         console.log("SMTP Connection verified successfully.");
 
