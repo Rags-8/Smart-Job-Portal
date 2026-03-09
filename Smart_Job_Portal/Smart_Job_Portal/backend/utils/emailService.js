@@ -18,8 +18,8 @@ const sendEmail = async (to, subject, htmlContent) => {
         // Use explicit configuration for better reliability in production
         const transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
-            port: 465,
-            secure: true, // use SSL
+            port: 587,
+            secure: false, // use STARTTLS
             auth: { user, pass },
             family: 4, // FORCE IPv4 to avoid ENETUNREACH on IPv6-only environments like Render/Vercel
             debug: true, // show debug output in logs
