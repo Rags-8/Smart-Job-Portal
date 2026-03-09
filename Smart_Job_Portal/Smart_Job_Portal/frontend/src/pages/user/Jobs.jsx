@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Search, Filter, MapPin, Briefcase, Clock, Building, CheckCircle, FileText, ChevronRight, Tags, ArrowRight } from 'lucide-react';
+import { Search, Filter, MapPin, Briefcase, Clock, Building, CheckCircle, FileText, ChevronRight, Tags, ArrowRight, RotateCcw } from 'lucide-react';
 import api from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -142,9 +142,18 @@ const Jobs = () => {
 
                 {/* Left Panel: Filters */}
                 <div className="lg:col-span-3 hidden lg:block bg-white/60 backdrop-blur-xl rounded-2xl border border-white p-6 h-[calc(100vh-10rem)] sticky top-[8.5rem] overflow-y-auto custom-scrollbar shadow-lg shadow-gray-200/50">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Filter className="w-5 h-5 text-violet-600" />
-                        <h2 className="text-lg font-bold text-gray-900 font-display">Filters</h2>
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-2">
+                            <Filter className="w-5 h-5 text-violet-600" />
+                            <h2 className="text-lg font-bold text-gray-900 font-display">Filters</h2>
+                        </div>
+                        <button
+                            onClick={() => { setSearchQuery(''); setFilters({ jobType: [], experience: [], location: '', skills: [], category: '', salary: 0 }) }}
+                            className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all group/reset"
+                            title="Reset All Filters"
+                        >
+                            <RotateCcw className="w-4 h-4 group-active/reset:rotate-[-180deg] transition-transform duration-300" />
+                        </button>
                     </div>
 
                     <div className="space-y-6">

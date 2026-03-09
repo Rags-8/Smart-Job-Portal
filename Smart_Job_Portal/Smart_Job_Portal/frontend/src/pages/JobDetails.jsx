@@ -5,6 +5,19 @@ import { useContext } from 'react'
 import { AuthContext } from '../context/AuthContext'
 import api from '../api/axios'
 
+const extractSkills = (rawSkills) => {
+  if (Array.isArray(rawSkills)) return rawSkills.join(', ')
+  if (typeof rawSkills === 'string') return rawSkills
+  if (rawSkills && typeof rawSkills === 'object') {
+    return Object.values(rawSkills).flat().filter(Boolean).join(', ')
+  }
+  return ''
+}
+
+const getPersonalInfo = (resumeData) => {
+  return resumeData?.personal || resumeData?.personalInfo || {}
+}
+
 export function JobDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -60,18 +73,20 @@ export function JobDetails() {
             setSavedResumes(resumes)
             if (resumes.length > 0) {
               const latest = resumes[0]
+              const rData = latest.resume_data || {}
+              const pInfo = getPersonalInfo(rData)
+
               setSelectedSavedResume(latest)
-              const rawSkills = latest.resume_data?.skills
-              const skillsStr = Array.isArray(rawSkills)
-                ? rawSkills.join(', ')
-                : typeof rawSkills === 'string'
-                  ? rawSkills
-                  : ''
-              const resumeName =
-                latest.resume_data?.personalInfo?.fullName || user?.name || 'My Resume'
+              const skillsStr = extractSkills(rData.skills)
+              const resumeName = pInfo.fullName || user?.name || 'My Resume'
+
               setFormData(prev => ({
                 ...prev,
-                skills: skillsStr || prev.skills,
+                email: pInfo.email || prev.email,
+                phone_number: pInfo.phone || prev.phone_number,
+                linkedin_url: pInfo.linkedin || prev.linkedin_url,
+                github_url: pInfo.github || prev.github_url,
+                skills: skillsStr,
                 resume_url: `saved:${latest.id}:${resumeName}`,
               }))
             }
@@ -103,18 +118,19 @@ export function JobDetails() {
   }
 
   const selectSavedResume = (resume) => {
-    const resumeData = resume.resume_data || {}
-    const rawSkills = resumeData.skills
-    const skillsStr = Array.isArray(rawSkills)
-      ? rawSkills.join(', ')
-      : typeof rawSkills === 'string'
-        ? rawSkills
-        : ''
-    const resumeName = resumeData.personalInfo?.fullName || user?.name || 'My Resume'
+    const rData = resume.resume_data || {}
+    const pInfo = getPersonalInfo(rData)
+    const skillsStr = extractSkills(rData.skills)
+    const resumeName = pInfo.fullName || user?.name || 'My Resume'
+
     setSelectedSavedResume(resume)
     setFormData(prev => ({
       ...prev,
-      skills: skillsStr || prev.skills,
+      email: pInfo.email || prev.email,
+      phone_number: pInfo.phone || prev.phone_number,
+      linkedin_url: pInfo.linkedin || prev.linkedin_url,
+      github_url: pInfo.github || prev.github_url,
+      skills: skillsStr,
       resume_url: `saved:${resume.id}:${resumeName}`,
     }))
     setSelectedFileName(null)
