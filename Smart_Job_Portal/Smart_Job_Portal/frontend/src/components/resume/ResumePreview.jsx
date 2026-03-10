@@ -122,14 +122,14 @@ const ResumePreview = ({ resumeData }) => {
                             <div className="space-y-4">
                                 {education.map((edu, i) => (
                                     <div key={i} className="mb-2">
-                                        <div className="flex justify-between items-baseline">
-                                             <h4 className="font-bold text-slate-900 text-[11pt]">{edu.degree || 'Degree'}</h4>
-                                             <div className="text-right">
-                                                 <span className="text-[10pt] font-black text-slate-600 tracking-tighter block">{edu.year}</span>
-                                                 {edu.cgpa && <span className="text-[9pt] font-bold text-violet-600">CGPA: {edu.cgpa}</span>}
-                                             </div>
+                                        <div className="flex justify-between items-baseline mb-1">
+                                             <h4 className="font-bold text-slate-900 text-[11pt]">{edu.degree || 'Degree Name'}</h4>
+                                             <span className="text-[10pt] font-black text-slate-600 tracking-tighter">{edu.year || 'Year'}</span>
                                          </div>
-                                        <div className="text-[10.5pt] text-slate-800 font-medium">{edu.college}</div>
+                                        <div className="flex justify-between items-baseline text-[10.5pt]">
+                                            <span className="text-slate-800 font-medium">{edu.college || 'University Name'}</span>
+                                            {edu.cgpa && <span className="text-[9pt] font-bold text-violet-600">CGPA: {edu.cgpa}</span>}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
