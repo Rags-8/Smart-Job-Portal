@@ -48,7 +48,7 @@ const sendEmail = async (to, subject, htmlContent) => {
                 const info = await transporter.sendMail(mailOptions);
                 console.timeEnd(`[SMTP_Timer] ${to}`);
                 console.log(`[SMTP] Success! ID: ${info.messageId}`);
-                return true;
+                return { success: true, provider: 'Gmail', messageId: info.messageId };
             } catch (smtpError) {
                 gmailFailed = true;
                 smtpErrorDetails = smtpError.message;
@@ -60,6 +60,12 @@ const sendEmail = async (to, subject, htmlContent) => {
         if (resendKey) {
             console.log(`[Resend] Attempting API delivery to: ${to}...`);
             const resend = new Resend(resendKey);
+
+            // Check for Resend onboarding limits
+            if (to !== emailUser && to !== process.env.SMTP_USER) {
+                console.warn(`[Resend] Warning: Sending to external address ${to} via onboarding@resend.dev might be blocked by Resend unless domain is verified.`);
+            }
+
             const { data, error } = await resend.emails.send({
                 from: 'Smart Job Portal <onboarding@resend.dev>',
                 to: to,
@@ -77,7 +83,7 @@ const sendEmail = async (to, subject, htmlContent) => {
             }
 
             console.log(`[Resend] Success! ID: ${data.id}`);
-            return true;
+            return { success: true, provider: 'Resend', id: data.id };
         }
 
         const reason = gmailFailed ? `Gmail SMTP failed (${smtpErrorDetails}) and no Resend key found.` : "No email credentials configured (checked EMAIL_USER/PASS and SMTP_USER/PASS).";

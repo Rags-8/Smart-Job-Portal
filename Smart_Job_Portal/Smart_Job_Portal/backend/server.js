@@ -48,10 +48,11 @@ app.get('/api/test-email', async (req, res) => {
         "<h2>It works!</h2><p>This is a test email triggered from the CareerLens API logs debugging session.</p>"
     );
 
-    if (result === true) {
+    if (result.success === true) {
         res.json({
             status: "Success",
-            message: `Test email sent successfully to ${testRecipient}`,
+            provider: result.provider,
+            message: `Test email sent successfully to ${testRecipient} via ${result.provider}`,
             config: {
                 hasGmail: !!(process.env.EMAIL_USER || process.env.SMTP_USER),
                 hasResend: !!process.env.RESEND_API_KEY
