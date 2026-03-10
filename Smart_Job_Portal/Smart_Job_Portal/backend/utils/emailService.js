@@ -24,11 +24,11 @@ const sendEmail = async (to, subject, htmlContent) => {
                 // For simplicity, we'll recreate if credentials don't match or every time if needed, 
                 // but let's just make sure it's initialized with the found credentials.
                 if (!transporter) {
-                    console.log(`[SMTP] Initializing transporter for ${emailUser}`);
+                    console.log(`[SMTP] Initializing transporter for ${emailUser} on port 587`);
                     transporter = nodemailer.createTransport({
                         host: 'smtp.gmail.com',
-                        port: 465,
-                        secure: true, // Use SSL
+                        port: 587,
+                        secure: false, // Use STARTTLS
                         auth: { user: emailUser, pass: emailPass },
                         connectionTimeout: 10000,
                         greetingTimeout: 10000,
