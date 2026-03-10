@@ -24,11 +24,9 @@ const sendEmail = async (to, subject, htmlContent) => {
                 // For simplicity, we'll recreate if credentials don't match or every time if needed, 
                 // but let's just make sure it's initialized with the found credentials.
                 if (!transporter) {
-                    console.log(`[SMTP] Initializing transporter for ${emailUser} on port 587`);
+                    console.log(`[SMTP] Initializing transporter via Gmail service for ${emailUser}`);
                     transporter = nodemailer.createTransport({
-                        host: 'smtp.gmail.com',
-                        port: 587,
-                        secure: false, // Use STARTTLS
+                        service: 'gmail',
                         auth: { user: emailUser, pass: emailPass },
                         connectionTimeout: 10000,
                         greetingTimeout: 10000,
@@ -52,6 +50,8 @@ const sendEmail = async (to, subject, htmlContent) => {
             } catch (smtpError) {
                 gmailFailed = true;
                 smtpErrorDetails = smtpError.message;
+                // Wipe the transporter so the next attempt starts fresh if this was a connection hang
+                transporter = null;
                 console.warn(`[SMTP] Gmail failed (${smtpError.message}). Falling back to secondary...`);
             }
         }
