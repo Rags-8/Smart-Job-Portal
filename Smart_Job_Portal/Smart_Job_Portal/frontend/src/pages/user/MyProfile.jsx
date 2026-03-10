@@ -406,14 +406,7 @@ const MyProfile = () => {
                                         ))}
                                     </div>
                                     
-                                    {profile?.professional_profile && (
-                                        <div className="mt-8 pt-8 border-t border-slate-100">
-                                            <h3 className="text-lg font-black mb-4">Professional Summary</h3>
-                                            <p className="text-sm font-medium text-slate-600 leading-relaxed bg-slate-50/50 p-6 rounded-2xl border border-slate-100 italic">
-                                                "{profile?.professional_profile}"
-                                            </p>
-                                        </div>
-                                    )}
+
                                 </div>
                             </div>
                         )}
@@ -432,12 +425,13 @@ const MyProfile = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Bio</label>
-                                        <textarea
-                                            rows={4}
-                                            value={formData.professional_profile}
-                                            onChange={e => setFormData(p => ({ ...p, professional_profile: e.target.value }))}
-                                            className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold text-sm focus:ring-4 focus:ring-violet-100 focus:border-violet-300 transition-all outline-none resize-none"
+                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">LinkedIn URL</label>
+                                        <input
+                                            type="url"
+                                            value={formData.linkedin_url}
+                                            onChange={e => setFormData(p => ({ ...p, linkedin_url: e.target.value }))}
+                                            className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold text-sm focus:ring-4 focus:ring-violet-100 focus:border-violet-300 transition-all outline-none"
+                                            placeholder="https://linkedin.com/in/yourprofile"
                                         />
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
