@@ -53,6 +53,7 @@ app.get('/api/test-email', async (req, res) => {
             status: "Success",
             provider: result.provider,
             message: `Test email sent successfully to ${testRecipient} via ${result.provider}`,
+            smtpError: result.smtpError, // New field to show why Gmail failed
             config: {
                 hasGmail: !!(process.env.EMAIL_USER || process.env.SMTP_USER),
                 hasResend: !!process.env.RESEND_API_KEY

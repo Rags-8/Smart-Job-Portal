@@ -83,7 +83,12 @@ const sendEmail = async (to, subject, htmlContent) => {
             }
 
             console.log(`[Resend] Success! ID: ${data.id}`);
-            return { success: true, provider: 'Resend', id: data.id };
+            return {
+                success: true,
+                provider: 'Resend',
+                id: data.id,
+                smtpError: smtpErrorDetails // Show why Gmail failed even if Resend worked
+            };
         }
 
         const reason = gmailFailed ? `Gmail SMTP failed (${smtpErrorDetails}) and no Resend key found.` : "No email credentials configured (checked EMAIL_USER/PASS and SMTP_USER/PASS).";
