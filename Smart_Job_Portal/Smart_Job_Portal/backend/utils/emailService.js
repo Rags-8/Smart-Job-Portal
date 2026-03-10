@@ -9,25 +9,33 @@ let transporter = null;
  * Sends an email using Gmail SMTP (via Nodemailer) or Resend as backup.
  */
 const sendEmail = async (to, subject, htmlContent) => {
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_PASS;
+    const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
+    const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || "").trim();
     const resendKey = getResendKey();
 
     let gmailFailed = false;
+    let smtpErrorDetails = null;
 
     try {
         // 1. Attempt Gmail SMTP if credentials exist
         if (emailUser && emailPass) {
             try {
+                // If transporter already exists but credentials changed or were missing before, we might need a fresh one
+                // For simplicity, we'll recreate if credentials don't match or every time if needed, 
+                // but let's just make sure it's initialized with the found credentials.
                 if (!transporter) {
+                    console.log(`[SMTP] Initializing transporter for ${emailUser}`);
                     transporter = nodemailer.createTransport({
-                        service: 'gmail',
+                        host: 'smtp.gmail.com',
+                        port: 465,
+                        secure: true, // Use SSL
                         auth: { user: emailUser, pass: emailPass },
-                        connectionTimeout: 10000, // 10 seconds
+                        connectionTimeout: 10000,
                         greetingTimeout: 10000,
                         socketTimeout: 15000
                     });
                 }
+
                 const mailOptions = {
                     from: `"Smart Job Portal" <${emailUser}>`,
                     to: to,
@@ -43,6 +51,7 @@ const sendEmail = async (to, subject, htmlContent) => {
                 return true;
             } catch (smtpError) {
                 gmailFailed = true;
+                smtpErrorDetails = smtpError.message;
                 console.warn(`[SMTP] Gmail failed (${smtpError.message}). Falling back to secondary...`);
             }
         }
@@ -60,20 +69,27 @@ const sendEmail = async (to, subject, htmlContent) => {
 
             if (error) {
                 console.error("[Resend] API Error:", error);
-                return { error: error.message };
+                return {
+                    error: error.message,
+                    source: 'Resend',
+                    smtpError: smtpErrorDetails
+                };
             }
 
             console.log(`[Resend] Success! ID: ${data.id}`);
             return true;
         }
 
-        const reason = gmailFailed ? "Gmail SMTP failed and no Resend key found." : "No email credentials configured.";
+        const reason = gmailFailed ? `Gmail SMTP failed (${smtpErrorDetails}) and no Resend key found.` : "No email credentials configured (checked EMAIL_USER/PASS and SMTP_USER/PASS).";
         console.warn(`⚠️ ${reason} Skipping email to: ${to}`);
-        return { error: reason };
+        return {
+            error: reason,
+            smtpError: smtpErrorDetails
+        };
 
     } catch (criticalError) {
         console.error("Critical error in sendEmail wrapper:", criticalError);
-        return { error: criticalError.message };
+        return { error: criticalError.message, source: 'Critical' };
     }
 };
 

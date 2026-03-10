@@ -153,9 +153,8 @@ function buildResumeFromPrompt(text, userProfile = {}) {
 router.post('/analyze-resume', verifyAuth, async (req, res) => {
     try {
         const { resume_id } = req.body;
-        const { data: resumes, error: resumeErr } = await supabase.from('resumes').select('*').eq('id', resume_id);
-        if (resumeErr) throw resumeErr;
-        if (!resumes || resumes.length === 0) throw new Error('Resume not found');
+        const { rows: resumes } = await db.query('SELECT * FROM resumes WHERE id = $1', [resume_id]);
+        if (resumes.length === 0) throw new Error('Resume not found');
         const resume = resumes[0];
 
         const prompt = `
@@ -187,21 +186,24 @@ router.post('/analyze-resume', verifyAuth, async (req, res) => {
             parsedData = { error: 'Failed to process AI output' };
         }
 
-        const { data: analysis, error: analysisErr } = await supabase.from('resume_analysis')
-            .insert([{
-                resume_id,
-                skills: parsedData.skills || [],
-                experience: parsedData.experience || '',
-                education: parsedData.education || '',
-                projects: parsedData.projects || '',
-                readiness_score: parsedData.readiness_score || 0,
-                tech_score: parsedData.tech_score || 0,
-                projects_score: parsedData.projects_score || 0,
-                comm_score: parsedData.comm_score || 0,
-                structure_score: parsedData.structure_score || 0
-            }])
-            .select('*');
-        if (analysisErr) throw analysisErr;
+        const { rows: analysis } = await db.query(`
+            INSERT INTO resume_analysis (
+                resume_id, skills, experience, education, projects,
+                readiness_score, tech_score, projects_score, comm_score, structure_score
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            RETURNING *
+        `, [
+            resume_id,
+            parsedData.skills || [],
+            parsedData.experience || '',
+            parsedData.education || '',
+            parsedData.projects || '',
+            parsedData.readiness_score || 0,
+            parsedData.tech_score || 0,
+            parsedData.projects_score || 0,
+            parsedData.comm_score || 0,
+            parsedData.structure_score || 0
+        ]);
         res.json(analysis[0]);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -212,13 +214,11 @@ router.post('/analyze-resume', verifyAuth, async (req, res) => {
 router.post('/match-job', verifyAuth, async (req, res) => {
     try {
         const { application_id, job_id, resume_id } = req.body;
-        const { data: jobs, error: jobErr } = await supabase.from('jobs').select('*').eq('id', job_id);
-        if (jobErr) throw jobErr;
-        if (!jobs || jobs.length === 0) return res.status(404).json({ error: 'Job not found' });
+        const { rows: jobs } = await db.query('SELECT * FROM jobs WHERE id = $1', [job_id]);
+        if (jobs.length === 0) return res.status(404).json({ error: 'Job not found' });
         const job = jobs[0];
 
-        const { data: analyses, error: analysisErr } = await supabase.from('resume_analysis').select('*').eq('resume_id', resume_id);
-        if (analysisErr) throw analysisErr;
+        const { rows: analyses } = await db.query('SELECT * FROM resume_analysis WHERE resume_id = $1', [resume_id]);
         const analysis = (analyses && analyses.length > 0) ? analyses[0] : null;
 
         const prompt = `
@@ -251,16 +251,18 @@ router.post('/match-job', verifyAuth, async (req, res) => {
             parsedData = { match_percentage: 0, matched_skills: [], missing_skills: [], fit_level: 'Error evaluating fit' };
         }
 
-        const { data: matchResult, error: matchErr } = await supabase.from('job_match_results')
-            .insert([{
-                application_id,
-                match_percentage: parsedData.match_percentage || 0,
-                matched_skills: parsedData.matched_skills || [],
-                missing_skills: parsedData.missing_skills || [],
-                fit_level: parsedData.fit_level || 'Not Evaluated'
-            }])
-            .select('*');
-        if (matchErr) throw matchErr;
+        const { rows: matchResult } = await db.query(`
+            INSERT INTO job_match_results (
+                application_id, match_percentage, matched_skills, missing_skills, fit_level
+            ) VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+        `, [
+            application_id,
+            parsedData.match_percentage || 0,
+            parsedData.matched_skills || [],
+            parsedData.missing_skills || [],
+            parsedData.fit_level || 'Not Evaluated'
+        ]);
         res.json(matchResult[0]);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -271,8 +273,7 @@ router.post('/match-job', verifyAuth, async (req, res) => {
 router.post('/recommendations', verifyAuth, async (req, res) => {
     try {
         const { application_id, resume_id } = req.body;
-        const { data: matches, error: matchErr } = await supabase.from('job_match_results').select('*').eq('application_id', application_id);
-        if (matchErr) throw matchErr;
+        const { rows: matches } = await db.query('SELECT * FROM job_match_results WHERE application_id = $1', [application_id]);
         const match = (matches && matches.length > 0) ? matches[0] : null;
 
         const prompt = `
@@ -300,27 +301,25 @@ router.post('/recommendations', verifyAuth, async (req, res) => {
             parsedData = { skills_to_learn: [], tools_tech: [], project_ideas: [], improvements: '', interview_tips: '', learning_roadmap: {} };
         }
 
-        const { data: recRows, error: recErr } = await supabase.from('recommendations')
-            .insert([{
-                user_id: req.user.id,
-                skills_to_learn: parsedData.skills_to_learn || [],
-                tools_tech: parsedData.tools_tech || [],
-                project_ideas: parsedData.project_ideas || [],
-                improvements: parsedData.improvements || '',
-                interview_tips: parsedData.interview_tips || '',
-                learning_roadmap: parsedData.learning_roadmap || {}
-            }])
-            .select('*');
-        if (recErr) throw recErr;
+        const { rows: recRows } = await db.query(`
+            INSERT INTO recommendations (
+                user_id, skills_to_learn, tools_tech, project_ideas, improvements, interview_tips, learning_roadmap
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+        `, [
+            req.user.id,
+            parsedData.skills_to_learn || [],
+            parsedData.tools_tech || [],
+            parsedData.project_ideas || [],
+            parsedData.improvements || '',
+            parsedData.interview_tips || '',
+            parsedData.learning_roadmap || {}
+        ]);
 
-        const { error: gapErr } = await supabase.from('skill_gaps')
-            .insert([{
-                application_id,
-                must_have: match?.missing_skills || [],
-                good_to_have: [],
-                weak_areas: parsedData.skills_to_learn || []
-            }]);
-        if (gapErr) throw gapErr;
+        await db.query(`
+            INSERT INTO skill_gaps (application_id, must_have, good_to_have, weak_areas)
+            VALUES ($1, $2, $3, $4)
+        `, [application_id, match?.missing_skills || [], [], parsedData.skills_to_learn || []]);
 
         res.json({ recommendations: recRows[0] });
     } catch (error) {

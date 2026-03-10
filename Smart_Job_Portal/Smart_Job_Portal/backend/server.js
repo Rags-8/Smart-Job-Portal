@@ -33,23 +33,35 @@ app.get('/api/health', (req, res) => {
 // Test Email Route (Temporary for debugging)
 const { sendEmail } = require('./utils/emailService');
 app.get('/api/test-email', async (req, res) => {
-    const testRecipient = req.query.to || process.env.EMAIL_USER;
-    if (!testRecipient) return res.status(400).json({ error: "Missing recipient" });
+    const testRecipient = req.query.to || process.env.EMAIL_USER || process.env.SMTP_USER;
+    if (!testRecipient) {
+        return res.status(400).json({
+            error: "Missing recipient",
+            message: "Provide a recipient email like /api/test-email?to=your@email.com or set EMAIL_USER/SMTP_USER in environment."
+        });
+    }
 
     console.log(`[TEST] Triggering test email to: ${testRecipient}`);
-    const success = await sendEmail(
+    const result = await sendEmail(
         testRecipient,
         "Test Email from Smart Job Portal",
         "<h2>It works!</h2><p>This is a test email triggered from the CareerLens API logs debugging session.</p>"
     );
 
-    if (success === true) {
-        res.json({ message: `Test email sent successfully to ${testRecipient}` });
+    if (result === true) {
+        res.json({
+            status: "Success",
+            message: `Test email sent successfully to ${testRecipient}`,
+            config: {
+                hasGmail: !!(process.env.EMAIL_USER || process.env.SMTP_USER),
+                hasResend: !!process.env.RESEND_API_KEY
+            }
+        });
     } else {
-        // If success is an error object (which we will modify sendEmail to return)
         res.status(500).json({
+            status: "Failed",
             error: "Failed to send test email.",
-            details: success // success will now contain the error object if it fails
+            details: result
         });
     }
 });
