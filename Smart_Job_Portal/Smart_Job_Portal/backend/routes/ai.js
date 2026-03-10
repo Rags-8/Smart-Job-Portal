@@ -3,9 +3,100 @@ const router = express.Router();
 const { verifyAuth } = require('./auth');
 const db = require('../db');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { localEvaluate } = require('../utils/screeningService');
 
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// ─── 0. Preview Match Score ──────────────────────────────────────────────────
+router.get('/preview-match/:jobId', verifyAuth, async (req, res) => {
+    try {
+        const jobId = req.params.jobId;
+        const userId = req.user.id;
+
+        // 1. Get latest resume
+        const { rows: resumes } = await db.query(
+            'SELECT resume_data FROM user_resumes WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 1',
+            [userId]
+        );
+
+        if (resumes.length === 0) {
+            return res.json({ score: 0, reason: 'No resume found' });
+        }
+
+        // 2. Get job details
+        const { rows: jobs } = await db.query('SELECT * FROM jobs WHERE id = $1', [jobId]);
+        if (jobs.length === 0) return res.status(404).json({ error: 'Job not found' });
+
+        const job = jobs[0];
+        const resumeData = resumes[0].resume_data || {};
+        const appMock = buildAppMock(resumeData);
+
+        const result = localEvaluate(job, appMock);
+        res.json({ score: result.match_percentage });
+    } catch (error) {
+        console.error('Preview match error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ─── 0.1 Preview All Job Matches ─────────────────────────────────────────────
+router.get('/preview-all', verifyAuth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // 1. Get latest resume
+        const { rows: resumes } = await db.query(
+            'SELECT resume_data FROM user_resumes WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 1',
+            [userId]
+        );
+
+        if (resumes.length === 0) {
+            return res.json({ scores: {}, reason: 'No resume found' });
+        }
+
+        const resumeData = resumes[0].resume_data || {};
+        const appMock = buildAppMock(resumeData);
+
+        // 2. Get all active jobs
+        const { rows: jobs } = await db.query('SELECT * FROM jobs');
+
+        // 3. Calculate scores for each job
+        const scores = {};
+        jobs.forEach(job => {
+            const result = localEvaluate(job, appMock);
+            scores[job.id] = result.match_percentage;
+        });
+
+        res.json({ scores });
+    } catch (error) {
+        console.error('Preview-all error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ─── Helper: Build mock application from resume data ────────────────────────
+function buildAppMock(resumeData) {
+    const skills = Array.isArray(resumeData.skills) ? resumeData.skills.join(', ') :
+        (typeof resumeData.skills === 'object' ? Object.values(resumeData.skills).flat().join(', ') : (resumeData.skills || ''));
+
+    const expText = Array.isArray(resumeData.experience) ?
+        resumeData.experience.map(e => `${e.role || ''} at ${e.company || ''} ${e.description || ''}`).join('; ') :
+        (resumeData.experience || '');
+
+    const projectText = Array.isArray(resumeData.projects) ?
+        resumeData.projects.map(p => `${p.title || ''} ${p.description || ''}`).join('; ') :
+        (resumeData.projects || '');
+
+    const jobTitle = resumeData.personal?.jobTitle || '';
+
+    // Combine everything into skills for searching keywords
+    return {
+        skills: `${skills} ${jobTitle} ${projectText}`.trim(),
+        experience: expText,
+        full_name: resumeData.personal?.fullName || 'User'
+    };
+}
 
 // ─── Helper: Call Gemini (single attempt — instant fallback on rate-limit) ───
 async function analyzeWithGemini(prompt) {

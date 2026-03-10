@@ -61,7 +61,19 @@ export function JobDetails() {
         const foundJob = response.data.find(j => String(j.id) === String(id))
         if (foundJob) {
           setJob(foundJob)
-          setMatchScore(Math.floor(Math.random() * 20) + 75)
+
+          // Fetch real or preview match score
+          if (user && user.role === 'user') {
+            api.get(`/applications/check/${id}`).then(checkRes => {
+              if (checkRes.data.applied) {
+                setMatchScore(checkRes.data.application.ai_match_score || 0)
+              } else {
+                api.get(`/ai/preview-match/${id}`).then(previewRes => {
+                  setMatchScore(previewRes.data.score || 0)
+                }).catch(() => setMatchScore(0))
+              }
+            }).catch(() => setMatchScore(0))
+          }
         } else {
           setError('Job not found')
         }
@@ -135,7 +147,10 @@ export function JobDetails() {
     }))
     setSelectedFileName(null)
     setShowResumeSelector(false)
-    setMatchScore(Math.floor(Math.random() * 20) + 75)
+    setMatchScore(0)
+    api.get(`/ai/preview-match/${id}`).then(res => {
+      setMatchScore(res.data.score || 0)
+    }).catch(() => setMatchScore(0))
   }
 
   const clearSelectedResume = () => {

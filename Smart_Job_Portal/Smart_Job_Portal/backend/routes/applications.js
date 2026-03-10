@@ -5,6 +5,24 @@ const db = require('../db');
 const { sendEmail } = require('../utils/emailService');
 const { evaluateApplication } = require('../utils/screeningService');
 
+// GET /api/applications/check/:jobId -> User only
+router.get('/check/:jobId', verifyAuth, async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+    const { rows } = await db.query(
+      'SELECT id, status, ai_match_score FROM applications WHERE user_id = $1 AND job_id = $2',
+      [req.user.id, jobId]
+    );
+    if (rows.length > 0) {
+      return res.json({ applied: true, application: rows[0] });
+    }
+    res.json({ applied: false });
+  } catch (error) {
+    console.error('Error checking application status:', error);
+    res.status(500).json({ error: 'Failed to check application status' });
+  }
+});
+
 // POST /api/applications/:jobId -> User only
 router.post('/:jobId', verifyAuth, async (req, res) => {
   try {
