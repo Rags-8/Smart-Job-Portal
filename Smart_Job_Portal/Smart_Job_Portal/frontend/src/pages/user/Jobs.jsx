@@ -9,7 +9,6 @@ const Jobs = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [appliedJobIds, setAppliedJobIds] = useState(new Set());
-    const [matchScores, setMatchScores] = useState({});
 
     // Filtering & Search State
     const [searchQuery, setSearchQuery] = useState('');
@@ -42,15 +41,7 @@ const Jobs = () => {
             const { data } = await api.get('/jobs');
             setJobs(data);
 
-            // Fetch match scores if user is logged in
-            if (user && user.role === 'user') {
-                try {
-                    const scoreRes = await api.get('/ai/preview-all');
-                    setMatchScores(scoreRes.data.scores || {});
-                } catch (e) {
-                    console.error('Failed to fetch bulk match scores:', e);
-                }
-            }
+
         } catch (err) {
             setError('Failed to load jobs');
         } finally {
@@ -332,16 +323,7 @@ const Jobs = () => {
                                                             {new Date(job.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                         </span>
                                                     )}
-                                                    {user && user.role === 'user' && matchScores[job.id] !== undefined && (
-                                                        <div
-                                                            className={`text-[10px] font-black px-2.5 py-1 rounded-full border shadow-sm ${matchScores[job.id] >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                                                matchScores[job.id] >= 60 ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                                                                    'bg-slate-50 text-slate-500 border-slate-100'
-                                                                }`}
-                                                        >
-                                                            {matchScores[job.id]}% Match
-                                                        </div>
-                                                    )}
+
                                                 </div>
 
                                                 <h3 className="font-black text-gray-900 text-xl leading-tight mb-2 group-hover:text-blue-600 transition-colors">{job.title}</h3>

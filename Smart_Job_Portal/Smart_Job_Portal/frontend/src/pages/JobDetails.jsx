@@ -29,7 +29,6 @@ export function JobDetails() {
   const [savedResumes, setSavedResumes] = useState([])
   const [selectedSavedResume, setSelectedSavedResume] = useState(null)
   const [showResumeSelector, setShowResumeSelector] = useState(false)
-  const [matchScore, setMatchScore] = useState(0)
   const [applying, setApplying] = useState(false)
   const [selectedFileName, setSelectedFileName] = useState(null)
   const [pendingFile, setPendingFile] = useState(null)
@@ -63,18 +62,7 @@ export function JobDetails() {
         if (foundJob) {
           setJob(foundJob)
 
-          // Fetch real or preview match score
-          if (user && user.role === 'user') {
-            api.get(`/applications/check/${id}`).then(checkRes => {
-              if (checkRes.data.applied) {
-                setMatchScore(checkRes.data.application.ai_match_score || 0)
-              } else {
-                api.get(`/ai/preview-match/${id}`).then(previewRes => {
-                  setMatchScore(previewRes.data.score || 0)
-                }).catch(() => setMatchScore(0))
-              }
-            }).catch(() => setMatchScore(0))
-          }
+
         } else {
           setError('Job not found')
         }
@@ -149,10 +137,7 @@ export function JobDetails() {
     }))
     setSelectedFileName(null)
     setShowResumeSelector(false)
-    setMatchScore(0)
-    api.get(`/ai/preview-match/${id}`).then(res => {
-      setMatchScore(res.data.score || 0)
-    }).catch(() => setMatchScore(0))
+
   }
 
   const clearSelectedResume = () => {
@@ -202,9 +187,28 @@ export function JobDetails() {
     setError(null)
 
     try {
-      const resumeLabel = isSavedResumeSelected
-        ? `Saved Profile: ${getDisplayName()}`
-        : `Uploaded File: ${getDisplayName()}`
+      let resumeContent = ''
+      if (isSavedResumeSelected && selectedSavedResume) {
+        const rd = selectedSavedResume.resume_data || {}
+        const pInfo = getPersonalInfo(rd)
+
+        // Robust formatting for skills and experience
+        const skillsText = Array.isArray(rd.skills) ? rd.skills.join(', ') : (typeof rd.skills === 'string' ? rd.skills : '')
+        const expItems = Array.isArray(rd.experience) ? rd.experience : []
+
+        resumeContent = `RESUME PROFILE\n==============\nNAME: ${pInfo.fullName || user.name}\nEMAIL: ${pInfo.email || user.email}\nSUMMARY: ${pInfo.summary || 'N/A'}\n\nSKILLS: ${skillsText}\n\nEXPERIENCE:\n${expItems.map(exp => `- ${exp.title} at ${exp.company} (${exp.duration || 'N/A'})\n  ${exp.description || ''}`).join('\n\n')}`
+      } else if (isLocalFileSelected && pendingFile) {
+        // Convert file to Data URL
+        const reader = new FileReader()
+        const filePromise = new Promise((resolve, reject) => {
+          reader.onload = (e) => resolve(e.target.result)
+          reader.onerror = (e) => reject(e)
+        })
+        reader.readAsDataURL(pendingFile)
+        resumeContent = await filePromise
+      } else {
+        resumeContent = 'Selected Resume Label: ' + getDisplayName()
+      }
 
       const payload = {
         full_name: user?.name || 'Applicant',
@@ -212,7 +216,7 @@ export function JobDetails() {
         phone_number: formData.phone_number,
         skills: formData.skills || 'Not specified',
         experience: job?.experience_required || '0',
-        resume_url: resumeLabel,
+        resume_url: resumeContent,
         github_url: formData.github_url || '',
         linkedin_url: formData.linkedin_url || '',
       }
@@ -251,12 +255,7 @@ export function JobDetails() {
                       {job.company_name}
                     </div>
                   </div>
-                  {user && user.role === 'user' && (
-                    <div className="bg-slate-900 text-white px-6 py-3 rounded-2xl flex items-center gap-3 shadow-2xl shadow-slate-900/20">
-                      <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
-                      <span className="text-base font-black italic tracking-tight">{matchScore}% Match Score</span>
-                    </div>
-                  )}
+
                 </div>
 
                 <div className="flex flex-wrap gap-4">
@@ -424,12 +423,7 @@ export function JobDetails() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-8 w-full lg:w-auto">
-                  <div className="text-center sm:text-right">
-                    <div className="flex items-center justify-center sm:justify-end gap-2 text-emerald-600 font-black text-xl italic mb-1">
-                      <span>🎯</span> {matchScore}%
-                    </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Match Score</p>
-                  </div>
+
 
                   <div className="w-full sm:w-auto">
                     {user && user.role === 'user' ? (

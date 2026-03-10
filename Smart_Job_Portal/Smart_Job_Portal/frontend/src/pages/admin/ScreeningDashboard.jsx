@@ -88,17 +88,7 @@ const ScreeningDashboard = () => {
         }
     };
 
-    const handleStatusUpdate = async (id, status) => {
-        try {
-            const { data } = await api.put(`/applications/${id}/status`, { status });
-            setCandidates(prev => prev.map(app => app.id === id ? { ...app, status: data.status } : app));
-            if (selectedCandidate && selectedCandidate.id === id) {
-                setSelectedCandidate(prev => ({ ...prev, status: data.status }));
-            }
-        } catch (error) {
-            alert(error.response?.data?.error || 'Failed to update status');
-        }
-    };
+
 
     const selectedJobDetails = jobs.find(j => j.id === selectedJobId);
 
@@ -264,9 +254,9 @@ const ScreeningDashboard = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex px-2.5 py-1 rounded-full text-[0.7rem] font-extrabold uppercase tracking-wide border ${cand.status === 'Selected' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                            cand.status === 'Shortlisted' ? 'bg-violet-50 text-violet-700 border-violet-200' :
-                                                                cand.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200' :
-                                                                    'bg-gray-100 text-gray-600 border-gray-200'
+                                                        cand.status === 'Shortlisted' ? 'bg-violet-50 text-violet-700 border-violet-200' :
+                                                            cand.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                                'bg-gray-100 text-gray-600 border-gray-200'
                                                         }`}>
                                                         {cand.status}
                                                     </span>
@@ -301,8 +291,8 @@ const ScreeningDashboard = () => {
                                     </div>
                                     {selectedCandidate.aiData.screened ? (
                                         <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-extrabold border-4 ${selectedCandidate.aiData.matchScore >= THRESHOLD
-                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                                : 'bg-red-50 text-red-500 border-red-100'
+                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                            : 'bg-red-50 text-red-500 border-red-100'
                                             }`}>
                                             {selectedCandidate.aiData.matchScore}
                                         </div>
@@ -316,8 +306,8 @@ const ScreeningDashboard = () => {
                                 {/* Screening Result Banner */}
                                 {selectedCandidate.aiData.screened ? (
                                     <div className={`p-4 rounded-xl border ${selectedCandidate.aiData.matchScore >= THRESHOLD
-                                            ? 'bg-emerald-50 border-emerald-200'
-                                            : 'bg-red-50 border-red-200'
+                                        ? 'bg-emerald-50 border-emerald-200'
+                                        : 'bg-red-50 border-red-200'
                                         }`}>
                                         <div className="flex items-center gap-2 mb-1">
                                             {selectedCandidate.aiData.matchScore >= THRESHOLD
@@ -389,30 +379,7 @@ const ScreeningDashboard = () => {
                                 </div>
                             </div>
 
-                            {/* Actions Footer */}
-                            <div className="p-4 border-t border-gray-200 bg-gray-50 flex flex-col gap-3 shrink-0">
-                                <p className="text-xs text-center text-gray-400 font-medium">Override AI decision manually:</p>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleStatusUpdate(selectedCandidate.id, 'Selected')}
-                                        className="flex-1 px-4 py-2.5 font-bold text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                                    >
-                                        ✓ Select
-                                    </button>
-                                    <button
-                                        onClick={() => handleStatusUpdate(selectedCandidate.id, 'Shortlisted')}
-                                        className="flex-1 px-4 py-2.5 font-bold text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
-                                    >
-                                        Shortlist
-                                    </button>
-                                    <button
-                                        onClick={() => handleStatusUpdate(selectedCandidate.id, 'Rejected')}
-                                        className="flex-1 px-4 py-2.5 font-bold text-sm bg-white border border-gray-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                                    >
-                                        ✗ Reject
-                                    </button>
-                                </div>
-                            </div>
+
                         </>
                     )}
                 </div>
