@@ -85,10 +85,10 @@ function extractSkills(text) {
 function calculateFallbackScore(job, app) {
     const jobText = (job.requirements + " " + job.description + " " + job.title).toLowerCase();
     const appSkills = extractSkills(app.skills);
-    
+
     let matched = [];
     let missing = [];
-    
+
     appSkills.forEach(skill => {
         if (jobText.includes(skill.toLowerCase())) {
             matched.push(skill);
@@ -98,7 +98,7 @@ function calculateFallbackScore(job, app) {
     });
 
     const score = appSkills.length > 0 ? Math.round((matched.length / appSkills.length) * 100) : 50;
-    
+
     return {
         match_percentage: score,
         matched_skills: matched.slice(0, 10),
@@ -117,7 +117,7 @@ async function evaluateApplication(applicationId, jobId) {
     let parsedData = null;
     let app = null;
     let job = null;
-    
+
     try {
         console.log(`Starting AI screening for Application: ${applicationId}, Job: ${jobId}`);
 
@@ -168,7 +168,7 @@ async function evaluateApplication(applicationId, jobId) {
             const aiResponse = await result.response.text();
 
             console.log("AI Response Received.");
-            
+
             // Extraction logic with regex for robustness
             const jsonText = aiResponse.match(/\{[\s\S]*\}/);
             if (jsonText) {
